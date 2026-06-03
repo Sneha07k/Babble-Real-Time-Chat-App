@@ -1,0 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+
+.App{
+  min-height: 100vh;
+  display: flex;
+  background-image: url('C:/Users/sneha/OneDrive/Desktop/projects/OGC/frontend/src/bg.jpg');
+  background-size: cover;
+  background-position: center;
+}
