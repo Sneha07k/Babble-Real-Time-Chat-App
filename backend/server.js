@@ -2,8 +2,20 @@ const express = require("express");
 const app = express();
 const dotenv= require("dotenv")
 const { chats } = require("./data/data");
-dotenv.config()
+const userRoutes = require("./routes/userRoutes");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
+connectDB = require("./config/db");
+
+dotenv.config()
+connectDB();
+
+app.use(express.json()); 
+
+app.use("/api/user", userRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
 app.get("/", (req, res) => {
   res.send("API is running");
 });
