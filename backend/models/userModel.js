@@ -3,17 +3,19 @@ const bcrypt = require("bcryptjs");
 
 console.log("USER MODEL FILE LOADED");
 
-const userSchema = mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  picture: {
-    type: String,
-    // required: true,
-    default: "https://www.vecteezy.com/free-vector/default-user",
+const userSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    picture: {
+      type: String,
+      // required: true,
+      default:
+        "https://i.pinimg.com/736x/24/a5/4c/24a54c075ae7a7e7ae16d69e2766cefe.jpg",
+    },
   },
-},
-  {timestamps: true}
+  { timestamps: true },
 );
 
 userSchema.methods.matchPassword = async function (enteredPassword) {

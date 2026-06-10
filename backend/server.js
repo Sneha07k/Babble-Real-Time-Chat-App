@@ -13,6 +13,7 @@ connectDB();
 app.use(express.json()); 
 
 app.use("/api/user", userRoutes);
+app.use("/api/chat", require("./routes/chatRoutes"));
 
 app.use(notFound);
 app.use(errorHandler);

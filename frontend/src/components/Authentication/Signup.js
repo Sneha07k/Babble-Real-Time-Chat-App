@@ -93,7 +93,17 @@ const Signup = () => {
             "Content-type": "application/json",
           },
         }
-        const { data } = await axios.post("/api/user", { name, email, password, profilePicture }, config);
+        console.log("profilePicture =", profilePicture);
+        const { data }=await axios.post(
+          "/api/user",
+          {
+            name,
+            email,
+            password,
+            picture: profilePicture,
+          },
+          config,
+        );
         toaster.create({
           description: "Registration successful",
           type: "success",

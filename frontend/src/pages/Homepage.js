@@ -1,5 +1,6 @@
 import React from 'react'
-
+import {useEffect } from "react";
+import { useHistory } from "react-router-dom";
 import babbleLogo from "../babble_logo.svg";
 import {
   Box,
@@ -12,6 +13,17 @@ import Signup from '../components/Authentication/Signup';
 
 
 const Homepage = () => {
+ const history = useHistory();
+
+    useEffect(() => {
+        const user = JSON.parse(localStorage.getItem("userInfo"));
+      
+        if (user) {
+            history.push("/chats");
+        }
+    }, [history]);
+
+  
   return (
     <Container maxW="xl" centerContent>
       <Box
