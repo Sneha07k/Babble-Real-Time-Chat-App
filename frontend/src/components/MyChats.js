@@ -6,6 +6,7 @@ import { Box, Button, Stack } from "@chakra-ui/react";
 import ChatLoading from "./ChatLoading";
 import { Text } from "@chakra-ui/react";
 import { getSender } from "../config/ChatLogics";
+import GroupChatModal from "./miscellaneous/GroupChatModal";
 
 const MyChats = () => {
   const [loggedUser, setLoggedUser] = useState();
@@ -69,10 +70,12 @@ const MyChats = () => {
        >
          My Chats
        </Box>
-       <Button>
-         New Group Chat
-         <i class="fa-solid fa-plus"></i>
-       </Button>
+       <GroupChatModal>
+         <Button>
+           New Group Chat
+           <i class="fa-solid fa-plus"></i>
+         </Button>
+       </GroupChatModal>
      </Box>
 
      <Box

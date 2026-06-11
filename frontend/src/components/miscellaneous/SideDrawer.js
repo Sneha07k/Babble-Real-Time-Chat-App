@@ -110,7 +110,7 @@ const SideDrawer = () => {
   return (
     <>
       <Box
-        width="98.9vw"
+        width="100vw"
         backgroundColor="gray.800"
         height="9vh"
         display="flex"
