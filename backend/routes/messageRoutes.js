@@ -5,7 +5,14 @@ const { protect } = require('../middleware/authMiddleware');
 const { allMessages } = require("../controllers/messageController");
 
 router.route('/').post(protect, sendMessage);
-router.route('/:chatId').get(protect, allMessages);
+router.route("/:chatId").get(
+  protect,
+  (req, res, next) => {
+    console.log(" ROUTE HIT:", req.params.chatId);
+    next();
+  },
+  allMessages,
+);
 
 module.exports = router;
 

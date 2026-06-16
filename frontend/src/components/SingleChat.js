@@ -10,6 +10,13 @@ import axios from "axios";
 import { toaster } from "./ui/toaster";
 import "./styles.css"
 import ScorllableChat from "../components/ScorllableChat"
+import io from 'socket.io-client'
+import Lottie from 'react-lottie';
+import animationData from "../animation/Pudgy work.json"
+
+const ENDPOINT = "http://localhost:5000"
+var socket, selectedChatCompare;
+
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const { user,selectedChat, setSelectedChat } = ChatState();
@@ -17,8 +24,32 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  
+  const defaultOptions = {
+    loop: true,
+    autoplay: true,
+    animationData: animationData,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice",
+    },
+  };
+
+
+  useEffect(() => {
+    socket = io(ENDPOINT);
+    socket.emit("setup", user);
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on('typing', () => setIsTyping(true));
+    socket.on('stop typing', () => setIsTyping(false));
+  }, []);
+
+
   const sendMessage = async (event) => {
     if (event.key == "Enter" && newMessage) {
+      socket.emit('stop typing', selectedChat._id);
       try {
         const config = {
           headers: {
@@ -37,6 +68,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           config
         );
         console.log(data);
+        socket.emit("new message", data);
         setMessages([...messages, data])
         
       } catch (error) {
@@ -48,39 +80,71 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     }
   }
 
-  const fetchMessages = async () => {
-    if (!selectedChat) return;
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-      setLoading(true);
-      const { data } = await axios.get(
-        `/api/messages/${selectedChat._id}`,
-        config,
-      );
-      console.log(data);
-      setMessages(data);
-      setLoading(false);
-    } catch (error) {
-        toaster.create({
-          title: "Error occurred",
-          type: "error",
-        });
-      setLoading(false);
-    }
-    
+
+
+
+const fetchMessages = async () => {
+  if (!selectedChat?._id) return;
+
+  try {
+    const config = {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    };
+
+    setLoading(true);
+
+    const { data } = await axios.get(
+      `/api/messages/${selectedChat._id}`,
+      config,
+    );
+
+    // console.log("MESSAGES API RESPONSE:", data);
+
+    setMessages(data);
+    setLoading(false);
+    socket.emit('join chat', selectedChat._id);
+  } catch (error) {
+    console.log(error);
+    setLoading(false);
   }
+};
 
   useEffect(() => {
     fetchMessages();
+    selectedChatCompare = selectedChat;
   }, [selectedChat]);
+
+
+  useEffect(() => {
+    socket.on('message received', (newMessageReceived) => {
+      if (!selectedChatCompare || selectedChatCompare._id !== newMessageReceived.chat._id) {
+        //give notification;
+      }
+      else {
+        setMessages([...messages, newMessageReceived]);
+      }
+    });
+  });
 
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
-    // typing indicator logic
+    if (!socketConnected) return;
+    if (!typing) {
+      setTyping(true);
+      socket.emit('typing', selectedChat._id); 
+    }
+    let lastTypingTime = new Date().getTime();
+    var timerLength = 3000;
+    setTimeout(() => {
+      var timeNow = new Date().getTime();
+      var timeDifference = timeNow - lastTypingTime;
+      if (timeDifference >= timerLength && typing) {
+        socket.emit('stop typing', selectedChat._id);
+        setTyping(false);
+      }
+    },timerLength)
   }
 
 const [open, setOpen] = useState(false);
@@ -143,8 +207,8 @@ const [open, setOpen] = useState(false);
                 <span>{selectedChat.chatName.toUpperCase()}</span>
                 <UpdateGroupChatModal
                   fetchAgain={fetchAgain}
-                    setFetchAgain={setFetchAgain}
-                    fetchMessages={fetchMessages}
+                  setFetchAgain={setFetchAgain}
+                  fetchMessages={fetchMessages}
                 />
               </>
             )}
@@ -160,7 +224,7 @@ const [open, setOpen] = useState(false);
             borderRadius="lg"
             overflowY="hidden"
           >
-          {/* messages below */}
+            {/* messages below */}
             {loading ? (
               <Spinner
                 size="xl"
@@ -170,11 +234,23 @@ const [open, setOpen] = useState(false);
                 margin="auto"
               />
             ) : (
-                <div className="messages">
-                  <ScorllableChat messages= {messages}/>
+              <div className="messages">
+                <ScorllableChat messages={messages} />
               </div>
             )}
             <Field.Root isRequired mt={3}>
+              {isTyping ? (
+                <div>
+                  <Lottie
+                    options={defaultOptions}
+                    width={70}
+                    style={{ marginBottom: 15, marginLeft: 0 }}
+                    style={{ transform: "scaleX(-1)" }}
+                  />
+                </div>
+              ) : (
+                <></>
+              )}
               <Input
                 placeholder="Enter a message...."
                 variant="filled"
