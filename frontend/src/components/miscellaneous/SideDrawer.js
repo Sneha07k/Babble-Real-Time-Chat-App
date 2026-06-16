@@ -131,7 +131,21 @@ const SideDrawer = () => {
                 <Drawer.Header>
                   {/* <Drawer.Title>Drawer Title</Drawer.Title> */}
                 </Drawer.Header>
-                {loadingChat && <Spinner ml="auto" display="flex" />}
+                {loadingChat && (
+                  <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    w="100%"
+                    py={3}
+                  >
+                    <Spinner
+                      alignSelf="center"
+                      size="xl"
+                      margin="auto"
+                  />
+                  </Box>
+                )}
                 <Drawer.Body>
                   <Box
                     // display="flex"

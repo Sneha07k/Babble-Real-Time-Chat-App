@@ -8,7 +8,7 @@ import { Text } from "@chakra-ui/react";
 import { getSender } from "../config/ChatLogics";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
 
-const MyChats = () => {
+const MyChats = ({fetchAgain}) => {
   const [loggedUser, setLoggedUser] = useState();
 
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
@@ -38,13 +38,13 @@ const MyChats = () => {
       setLoggedUser(user);
       fetchChats();
     }
-  }, [user]);
+  }, [fetchAgain]);
 
  return (
    <Box
-     d={{ base: selectedChat ? "none" : "flex", md: "flex" }}
+     display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
      flexDir="column"
-     alignItems="center"
+    //  alignItems="center"
      p={3}
      bg="gray.900"
      height="86vh"

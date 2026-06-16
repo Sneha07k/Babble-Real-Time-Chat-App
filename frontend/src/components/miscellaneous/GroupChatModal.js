@@ -144,14 +144,15 @@ const GroupChatModal = ({ children }) => {
                   mb={1}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
-
-                {selectedUsers.map((u) => (
-                  <UserBadgeItem
-                    key={u._id}
-                    user={u}
-                    handleFunction={() => handleDelete(u)}
-                  />
-                ))}
+                <Box w="100%" display={"flex"} flexWrap={"wrap"} pb={3}>
+                  {selectedUsers.map((u) => (
+                    <UserBadgeItem
+                      key={u._id}
+                      user={u}
+                      handleFunction={() => handleDelete(u)}
+                    />
+                  ))}
+                </Box>
 
                 {loading ? (
                   <Box

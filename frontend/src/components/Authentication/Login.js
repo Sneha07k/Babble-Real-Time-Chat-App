@@ -4,11 +4,13 @@ import { toaster } from "../ui/toaster";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
 import { PasswordInput } from "../ui/password-input";
+import { ChatState } from "../../Context/ChatProvider";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-   const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { setUser } = ChatState();
     const history = useHistory();
 
   const submitHandler = async () => {
@@ -48,7 +50,7 @@ const Login = () => {
       });
 
       localStorage.setItem("userInfo", JSON.stringify(data));
-
+      setUser(data);
       setLoading(false);
 
       history.push("/chats");
