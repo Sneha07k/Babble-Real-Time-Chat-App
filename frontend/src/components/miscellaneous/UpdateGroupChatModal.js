@@ -162,9 +162,17 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
         </Text>
       </Dialog.Trigger>
       <Portal>
-        <Dialog.Backdrop />
+        <Dialog.Backdrop bg="rgba(0,0,0,0.7)" backdropFilter="blur(6px)" />
         <Dialog.Positioner>
-          <Dialog.Content>
+          <Dialog.Content
+            bg="rgba(8,12,28,0.98)"
+            color="white"
+            borderRadius="20px"
+            border="1px solid"
+            borderColor="rgba(34,211,238,0.15)"
+            backdropFilter="blur(20px)"
+            boxShadow="0 20px 50px rgba(0,0,0,0.5)"
+          >
             <Dialog.Header>
               <Dialog.Title>{selectedChat.chatName}</Dialog.Title>
             </Dialog.Header>
@@ -204,10 +212,8 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
                 <Field.Label>Add User to group</Field.Label>
                 <Input
                   mb={3}
-                  placeholder="Search Users" 
-                  onChange={(e) => handleSearch(e.target.value)
-                
-                  }
+                  placeholder="Search Users"
+                  onChange={(e) => handleSearch(e.target.value)}
                 />
               </Field.Root>
 

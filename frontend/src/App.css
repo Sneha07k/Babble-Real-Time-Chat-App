@@ -1,22 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
-.App{
+.App {
   min-height: 100vh;
   display: flex;
-  background-image: url('C:/Users/sneha/OneDrive/Desktop/projects/OGC/frontend/src/bg.jpg');
-  background-size: cover;
-  background-position: center;
+
+  background: linear-gradient(135deg,
+      #0b0d12 0%,
+      #141824 50%,
+      #1a2030 100%);
+
+  color: white;
 }
 
-
 ::-webkit-scrollbar {
-width: 0px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background:rgba(136, 136, 136, 0.281);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: rgba(255, 255, 255, 0.3);
 }
+
+

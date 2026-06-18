@@ -1,99 +1,29 @@
-<svg width="100%" viewBox="0 0 680 280" role="img" xmlns="http://www.w3.org/2000/svg" style="">
-  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Babble cartoon logo</title>
-  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Babble chat app logo with a chunky cartoon speech bubble character and bold lettering, transparent background</desc>
-
+<svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+  <title>Babble logo</title>
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-      <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </marker>
+    <linearGradient id="backBubbleGrad" gradientUnits="userSpaceOnUse" x1="20" y1="50" x2="145" y2="160">
+      <stop offset="0%" stop-color="#9FE8FF"/>
+      <stop offset="100%" stop-color="#1B6FB8"/>
+    </linearGradient>
   </defs>
 
-  <!-- ===== CARTOON SPEECH BUBBLE CHARACTER ===== -->
+  <!-- icon: two overlapping chat bubbles -->
+  <rect x="45" y="125" width="26" height="26" rx="6" fill="url(#backBubbleGrad)" transform="rotate(45 58 138)"/>
+  <rect x="28" y="58" width="108" height="82" rx="20" ry="20" fill="url(#backBubbleGrad)"/>
 
-  <!-- Shadow blob under bubble for cartoon grounding -->
-  <ellipse cx="136" cy="226" rx="68" ry="10" fill="#1a2a0a" opacity="0.35" style="fill:rgb(26, 42, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.35;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <rect x="92" y="72" width="26" height="26" rx="6" fill="#EAF6FF" transform="rotate(45 105 85)"/>
+  <rect x="92" y="18" width="92" height="70" rx="16" ry="16" fill="#EAF6FF"/>
+  <circle cx="120" cy="53" r="6" fill="#101826"/>
+  <circle cx="138" cy="53" r="6" fill="#101826"/>
+  <circle cx="156" cy="53" r="6" fill="#101826"/>
 
-  <!-- Bubble body — slightly wobbly via path for cartoon feel -->
-  <path d="&#10;    M 68 55&#10;    Q 66 28, 96 26&#10;    L 188 24&#10;    Q 218 22, 220 50&#10;    L 222 140&#10;    Q 224 168, 194 170&#10;    L 158 170&#10;    Q 148 170, 140 180&#10;    L 126 208&#10;    Q 122 218, 112 210&#10;    L 100 196&#10;    Q 92 184, 80 176&#10;    L 72 174&#10;    Q 42 172, 40 144&#10;    Z&#10;  " fill="#1c2a12" stroke="#3ddc0a" stroke-width="5" stroke-linejoin="round" style="fill:rgb(28, 42, 18);stroke:rgb(61, 220, 10);color:rgb(255, 255, 255);stroke-width:5px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-
-  <!-- Inner highlight — top-left sheen for cartoon depth -->
-  <path d="M 80 38 Q 110 30 160 33 Q 175 34 178 44 Q 155 36 110 38 Q 88 40 80 52 Z" fill="#5eff1a" opacity="0.12" style="fill:rgb(94, 255, 26);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.12;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-
-  <!-- Eyes — big expressive cartoon eyes -->
-  <!-- Left eye white -->
-  <ellipse cx="104" cy="98" rx="22" ry="24" fill="white" stroke="#3ddc0a" stroke-width="3" style="fill:rgb(255, 255, 255);stroke:rgb(61, 220, 10);color:rgb(255, 255, 255);stroke-width:3px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-  <!-- Right eye white -->
-  <ellipse cx="168" cy="98" rx="22" ry="24" fill="white" stroke="#3ddc0a" stroke-width="3" style="fill:rgb(255, 255, 255);stroke:rgb(61, 220, 10);color:rgb(255, 255, 255);stroke-width:3px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-
-  <!-- Left pupil -->
-  <ellipse cx="107" cy="101" rx="11" ry="13" fill="#1a2a0a" style="fill:rgb(26, 42, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-  <!-- Right pupil -->
-  <ellipse cx="171" cy="101" rx="11" ry="13" fill="#1a2a0a" style="fill:rgb(26, 42, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-
-  <!-- Eye shine left -->
-  <ellipse cx="111" cy="94" rx="4" ry="5" fill="white" opacity="0.9" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.9;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-  <!-- Eye shine right -->
-  <ellipse cx="175" cy="94" rx="4" ry="5" fill="white" opacity="0.9" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.9;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-
-  <!-- Smile — big chunky cartoon grin -->
-  <path d="M 92 138 Q 136 168 180 138" fill="none" stroke="#3ddc0a" stroke-width="5" stroke-linecap="round" style="fill:none;stroke:rgb(61, 220, 10);color:rgb(255, 255, 255);stroke-width:5px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-
-  <!-- Teeth inside smile -->
-  <path d="M 100 143 Q 136 168 172 143 Q 136 155 100 143 Z" fill="white" opacity="0.85" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.85;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-
-  <!-- Rosy cheeks -->
-  <ellipse cx="86" cy="130" rx="13" ry="8" fill="#ff6b6b" opacity="0.28" style="fill:rgb(255, 107, 107);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.28;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-  <ellipse cx="186" cy="130" rx="13" ry="8" fill="#ff6b6b" opacity="0.28" style="fill:rgb(255, 107, 107);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.28;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-
-  <!-- Little star sparkles around bubble -->
-  <!-- Star 1 top right -->
-  <g transform="translate(228, 38) rotate(15)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
-    <polygon points="0,-9 2,-3 8,-3 3,1 5,7 0,4 -5,7 -3,1 -8,-3 -2,-3" fill="#3ddc0a" opacity="0.85" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.85;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <!-- wordmark (vector outlines, font-independent) -->
+  <g fill="#EAF6FF">
+    <path transform="translate(214.00,130.00) scale(0.12,-0.12)" d="M422 -18Q354 -18 303.5 10.0Q253 38 224.5 92.0Q196 146 194 224H210V0H66V730H248V354L208 314Q211 395 239.0 452.0Q267 509 316.5 538.5Q366 568 431 568Q487 568 532.0 547.5Q577 527 608.5 489.5Q640 452 657.0 401.0Q674 350 674 289V265Q674 204 657.0 152.5Q640 101 607.0 62.5Q574 24 527.5 3.0Q481 -18 422 -18ZM370 132Q406 132 433.5 150.5Q461 169 476.5 202.0Q492 235 492 277Q492 320 476.5 351.5Q461 383 434.0 400.5Q407 418 370 418Q337 418 308.5 403.0Q280 388 262.0 359.0Q244 330 244 289V255Q244 216 263.0 188.5Q282 161 311.0 146.5Q340 132 370 132Z"/>
+    <path transform="translate(297.76,130.00) scale(0.12,-0.12)" d="M400 0V162H370V335Q370 373 352.5 391.5Q335 410 295 410Q276 410 239.0 409.0Q202 408 161.0 406.0Q120 404 86 402V554Q110 556 143.0 558.0Q176 560 211.5 561.0Q247 562 277 562Q362 562 421.5 537.0Q481 512 512.5 462.0Q544 412 544 335V0ZM225 -14Q167 -14 122.0 7.0Q77 28 51.5 67.5Q26 107 26 162Q26 224 59.0 262.5Q92 301 150.0 319.0Q208 337 283 337H390V243H283Q246 243 226.0 224.5Q206 206 206 175Q206 145 226.0 126.5Q246 108 283 108Q307 108 325.5 116.5Q344 125 356.0 146.0Q368 167 370 204L412 164Q407 107 384.5 67.5Q362 28 322.5 7.0Q283 -14 225 -14Z"/>
+    <path transform="translate(368.56,130.00) scale(0.12,-0.12)" d="M422 -18Q354 -18 303.5 10.0Q253 38 224.5 92.0Q196 146 194 224H210V0H66V730H248V354L208 314Q211 395 239.0 452.0Q267 509 316.5 538.5Q366 568 431 568Q487 568 532.0 547.5Q577 527 608.5 489.5Q640 452 657.0 401.0Q674 350 674 289V265Q674 204 657.0 152.5Q640 101 607.0 62.5Q574 24 527.5 3.0Q481 -18 422 -18ZM370 132Q406 132 433.5 150.5Q461 169 476.5 202.0Q492 235 492 277Q492 320 476.5 351.5Q461 383 434.0 400.5Q407 418 370 418Q337 418 308.5 403.0Q280 388 262.0 359.0Q244 330 244 289V255Q244 216 263.0 188.5Q282 161 311.0 146.5Q340 132 370 132Z"/>
+    <path transform="translate(452.32,130.00) scale(0.12,-0.12)" d="M422 -18Q354 -18 303.5 10.0Q253 38 224.5 92.0Q196 146 194 224H210V0H66V730H248V354L208 314Q211 395 239.0 452.0Q267 509 316.5 538.5Q366 568 431 568Q487 568 532.0 547.5Q577 527 608.5 489.5Q640 452 657.0 401.0Q674 350 674 289V265Q674 204 657.0 152.5Q640 101 607.0 62.5Q574 24 527.5 3.0Q481 -18 422 -18ZM370 132Q406 132 433.5 150.5Q461 169 476.5 202.0Q492 235 492 277Q492 320 476.5 351.5Q461 383 434.0 400.5Q407 418 370 418Q337 418 308.5 403.0Q280 388 262.0 359.0Q244 330 244 289V255Q244 216 263.0 188.5Q282 161 311.0 146.5Q340 132 370 132Z"/>
+    <path transform="translate(536.08,130.00) scale(0.12,-0.12)" d="M74 0V730H256V0ZM12 598V730H256V598Z"/>
+    <path transform="translate(573.76,130.00) scale(0.12,-0.12)" d="M325 -20Q255 -20 201.0 4.0Q147 28 110.0 69.0Q73 110 53.5 161.0Q34 212 34 266V286Q34 342 53.5 393.5Q73 445 109.5 485.0Q146 525 199.0 548.5Q252 572 319 572Q408 572 470.0 532.0Q532 492 565.0 426.5Q598 361 598 284V226H110V324H493L430 280Q430 327 417.5 359.5Q405 392 380.5 409.0Q356 426 319 426Q283 426 256.5 409.5Q230 393 216.0 359.5Q202 326 202 275Q202 229 215.0 195.5Q228 162 255.0 144.0Q282 126 325 126Q363 126 387.5 139.0Q412 152 422 174H588Q576 118 540.5 74.0Q505 30 450.5 5.0Q396 -20 325 -20Z"/>
   </g>
-  <!-- Star 2 small top left -->
-  <g transform="translate(42, 42) rotate(-10)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
-    <polygon points="0,-6 1.5,-2 5.5,-2 2.5,1 3.5,5 0,3 -3.5,5 -2.5,1 -5.5,-2 -1.5,-2" fill="#3ddc0a" opacity="0.6" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.6;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-  </g>
-  <!-- Star 3 tiny bottom right of bubble -->
-  <g transform="translate(230, 155) rotate(5)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
-    <polygon points="0,-5 1.2,-1.8 5,-1.8 2,0.8 3,4.5 0,2.5 -3,4.5 -2,0.8 -5,-1.8 -1.2,-1.8" fill="#7dff40" opacity="0.5" style="fill:rgb(125, 255, 64);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.5;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
-  </g>
-
-  <!-- ===== WORDMARK ===== -->
-
-  <!-- BABBLE in chunky rounded font -->
-  <!-- Each letter hand-placed for slight playful bounce -->
-
-  <!-- B -->
-  <text x="268" y="133" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="96" font-weight="900" fill="#3ddc0a" transform="rotate(-3, 268, 133)" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:96px;font-weight:900;text-anchor:start;dominant-baseline:auto">B</text>
-  <!-- a -->
-  <text x="340" y="140" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#e8ffe0" transform="rotate(2, 340, 140)" style="fill:rgb(232, 255, 224);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">a</text>
-  <!-- b -->
-  <text x="404" y="128" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#3ddc0a" transform="rotate(-2, 404, 128)" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">b</text>
-  <!-- b -->
-  <text x="463" y="142" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#e8ffe0" transform="rotate(1, 463, 142)" style="fill:rgb(232, 255, 224);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">b</text>
-  <!-- l -->
-  <text x="522" y="132" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#3ddc0a" transform="rotate(-1, 522, 132)" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">l</text>
-  <!-- e -->
-  <text x="548" y="143" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#e8ffe0" transform="rotate(2, 548, 143)" style="fill:rgb(232, 255, 224);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">e</text>
-
-  <!-- Outline stroke on letters for cartoon pop -->
-  <text x="268" y="133" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="96" font-weight="900" fill="none" stroke="#1a2a0a" stroke-width="6" stroke-linejoin="round" transform="rotate(-3, 268, 133)" paint-order="stroke" style="fill:none;stroke:rgb(26, 42, 10);color:rgb(255, 255, 255);stroke-width:6px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:96px;font-weight:900;text-anchor:start;dominant-baseline:auto">B</text>
-  <text x="340" y="140" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="none" stroke="#1a2a0a" stroke-width="6" stroke-linejoin="round" transform="rotate(2, 340, 140)" paint-order="stroke" style="fill:none;stroke:rgb(26, 42, 10);color:rgb(255, 255, 255);stroke-width:6px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">a</text>
-  <text x="404" y="128" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="none" stroke="#1a2a0a" stroke-width="6" stroke-linejoin="round" transform="rotate(-2, 404, 128)" paint-order="stroke" style="fill:none;stroke:rgb(26, 42, 10);color:rgb(255, 255, 255);stroke-width:6px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">b</text>
-  <text x="463" y="142" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="none" stroke="#1a2a0a" stroke-width="6" stroke-linejoin="round" transform="rotate(1, 463, 142)" paint-order="stroke" style="fill:none;stroke:rgb(26, 42, 10);color:rgb(255, 255, 255);stroke-width:6px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">b</text>
-  <text x="522" y="132" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="none" stroke="#1a2a0a" stroke-width="6" stroke-linejoin="round" transform="rotate(-1, 522, 132)" paint-order="stroke" style="fill:none;stroke:rgb(26, 42, 10);color:rgb(255, 255, 255);stroke-width:6px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">l</text>
-  <text x="548" y="143" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="none" stroke="#1a2a0a" stroke-width="6" stroke-linejoin="round" transform="rotate(2, 548, 143)" paint-order="stroke" style="fill:none;stroke:rgb(26, 42, 10);color:rgb(255, 255, 255);stroke-width:6px;stroke-linecap:butt;stroke-linejoin:round;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">e</text>
-
-  <!-- filled letters on top -->
-  <text x="268" y="133" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="96" font-weight="900" fill="#3ddc0a" transform="rotate(-3, 268, 133)" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:96px;font-weight:900;text-anchor:start;dominant-baseline:auto">B</text>
-  <text x="340" y="140" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#e8ffe0" transform="rotate(2, 340, 140)" style="fill:rgb(232, 255, 224);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">a</text>
-  <text x="404" y="128" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#3ddc0a" transform="rotate(-2, 404, 128)" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">b</text>
-  <text x="463" y="142" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#e8ffe0" transform="rotate(1, 463, 142)" style="fill:rgb(232, 255, 224);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">b</text>
-  <text x="522" y="132" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#3ddc0a" transform="rotate(-1, 522, 132)" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">l</text>
-  <text x="548" y="143" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="90" font-weight="900" fill="#e8ffe0" transform="rotate(2, 548, 143)" style="fill:rgb(232, 255, 224);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:90px;font-weight:900;text-anchor:start;dominant-baseline:auto">e</text>
-
-  <!-- Tagline -->
-  <text x="338" y="185" font-family="Arial Rounded MT Bold, Arial Black, sans-serif" font-size="14" fill="#3ddc0a" opacity="0.6" letter-spacing="4" style="fill:rgb(61, 220, 10);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:0.6;font-family:&quot;Arial Rounded MT Bold&quot;, &quot;Arial Black&quot;, sans-serif;font-size:14px;font-weight:400;text-anchor:start;dominant-baseline:auto">say it louder 💬</text>
-
 </svg>

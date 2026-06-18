@@ -10,8 +10,9 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
   const { setUser } = ChatState();
-    const history = useHistory();
+  const history = useHistory();
 
   const submitHandler = async () => {
     setLoading(true);
@@ -50,7 +51,12 @@ const Login = () => {
       });
 
       localStorage.setItem("userInfo", JSON.stringify(data));
+
+      setEmail("");
+      setPassword("");
+
       setUser(data);
+
       setLoading(false);
 
       history.push("/chats");
@@ -65,43 +71,72 @@ const Login = () => {
     }
   };
 
-
-  const guestCredentialsHandler = () => {
-    setEmail("guest@example.com");
-    setPassword("123456");
-  };
-
   return (
-    <VStack gap={4} align="stretch" w="100%" p={4}>
+    <VStack as="form" autoComplete="off" gap={5} align="stretch" w="100%" p={5}>
       <Field.Root>
-        <Field.Label>Email</Field.Label>
+        <Field.Label color="gray.300" fontWeight="medium">
+          Email
+        </Field.Label>
+
         <Input
           type="email"
+          name="login_email_babble"
+          autoComplete="off"
           placeholder="me@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          bg="rgba(255,255,255,0.05)"
+          border="1px solid"
+          borderColor="rgba(255,255,255,0.12)"
+          color="white"
+          borderRadius="lg"
+          _placeholder={{
+            color: "gray.500",
+          }}
+          _focus={{
+            borderColor: "#22D3EE",
+            boxShadow: "0 0 0 1px #22D3EE",
+          }}
         />
       </Field.Root>
 
       <Field.Root>
-        <Field.Label>Password</Field.Label>
+        <Field.Label color="gray.300" fontWeight="medium">
+          Password
+        </Field.Label>
+
         <PasswordInput
+          name="login_password_babble"
+          autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          bg="rgba(255,255,255,0.05)"
+          border="1px solid"
+          borderColor="rgba(255,255,255,0.12)"
+          color="white"
+          borderRadius="lg"
+          _focus={{
+            borderColor: "#22D3EE",
+            boxShadow: "0 0 0 1px #22D3EE",
+          }}
         />
       </Field.Root>
 
       <Button
-        colorScheme="blue"
         width="100%"
         onClick={submitHandler}
         loading={loading}
+        bg="#22D3EE"
+        color="#0B0D12"
+        fontWeight="bold"
+        borderRadius="lg"
+        _hover={{
+          bg: "#06B6D4",
+          transform: "translateY(-1px)",
+        }}
+        transition="all 0.2s"
       >
         Login
-      </Button>
-
-      <Button variant="outline" width="100%" onClick={guestCredentialsHandler}>
-        Get Guest Credentials
       </Button>
     </VStack>
   );

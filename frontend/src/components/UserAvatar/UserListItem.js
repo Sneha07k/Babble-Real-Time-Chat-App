@@ -1,36 +1,47 @@
 import React from "react";
-import { Avatar } from "@chakra-ui/react";
-import { ChatState } from "../../Context/ChatProvider";
-import { Text } from "@chakra-ui/react";
-import { Box } from "@chakra-ui/react";
-const UserListItem = ({ user,handleFunction }) => {
-//   const { user } = ChatState();
+import { Avatar, Box, Text } from "@chakra-ui/react";
+
+const UserListItem = ({ user, handleFunction }) => {
   return (
     <Box
       onClick={handleFunction}
       cursor="pointer"
-      bg="green"
-      _hover={{
-        background: "#38B2AC",
-        color: "white",
-      }}
       w="100%"
       display="flex"
       alignItems="center"
-      color="black"
-      px={3}
-      py={2}
+      gap={3}
+      px={4}
+      py={3}
       mb={2}
-      borderRadius="lg"
+      borderRadius="14px"
+      bg="rgba(255,255,255,0.04)"
+      border="1px solid"
+      borderColor="rgba(255,255,255,0.05)"
+      transition="all 0.2s ease"
+      _hover={{
+        bg: "rgba(34,211,238,0.15)",
+        borderColor: "rgba(34,211,238,0.25)",
+        transform: "translateY(-1px)",
+      }}
     >
-      <Avatar.Root size="sm">
+      <Avatar.Root size="sm" border="2px solid rgba(255,255,255,0.08)">
         <Avatar.Image src={user.picture} />
         <Avatar.Fallback name={user.name} />
       </Avatar.Root>
-      <Box>
-        <Text ml={3}>{user.name}</Text>
-        <Text ml={3}>
-          <b>Email:</b>
+
+      <Box overflow="hidden">
+        <Text color="white" fontWeight="600" fontSize="sm">
+          {user.name}
+        </Text>
+
+        <Text
+          color="gray.400"
+          fontSize="xs"
+          overflow="hidden"
+          textOverflow="ellipsis"
+          whiteSpace="nowrap"
+          maxW="220px"
+        >
           {user.email}
         </Text>
       </Box>

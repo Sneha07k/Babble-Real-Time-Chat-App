@@ -1,70 +1,110 @@
-import React from 'react'
-import {useEffect } from "react";
+import React from "react";
+import { useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import babbleLogo from "../babble_logo.svg";
-import {
-  Box,
-  Tabs,
-  Container,
-} from "@chakra-ui/react";
-import Login from '../components/Authentication/Login';
-import Signup from '../components/Authentication/Signup';
-// import { Tabs } from "@chakra-ui/react";
-
+import { Box, Tabs } from "@chakra-ui/react";
+import Login from "../components/Authentication/Login";
+import Signup from "../components/Authentication/Signup";
 
 const Homepage = () => {
- const history = useHistory();
+  const history = useHistory();
 
-    useEffect(() => {
-        const user = JSON.parse(localStorage.getItem("userInfo"));
-      
-        if (user) {
-            history.push("/chats");
-        }
-    }, [history]);
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("userInfo"));
 
-  
+    if (user) {
+      history.push("/chats");
+    }
+  }, [history]);
+
   return (
-    <Container maxW="xl" centerContent>
+    <Box
+      minH="100vh"
+      w="100%"
+      bg="linear-gradient(135deg, #0B0D12 0%, #141824 100%)"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      py={10}
+    >
+      {/* Logo only */}
       <Box
-        d="flex"
+        display="flex"
         justifyContent="center"
-        pl= {20}
+        alignItems="center"
         w="100%"
-        m="40px 0 15px 0"
-        borderRadius="lg"
-        borderWidth="1px"
-        borderColor="rgba(61, 59, 59, 0)"
+        mb={12}
       >
-        <img src={babbleLogo} alt="Babble Logo" p={0}  width="2000" />
+        <img src={babbleLogo} alt="Babble Logo" width="400" />
       </Box>
+
+      {/* Auth Card */}
       <Box
-        d="flex"
-        justifyContent="center"
-        p={0}
-        bg="rgba(61, 59, 59, 0.8)"
-        w="100%"
-        m="0px 0 15px 0"
-        borderRadius="lg"
+        w={{ base: "90%", md: "450px" }}
+        bg="rgba(20,22,28,0.85)"
+        backdropFilter="blur(18px)"
+        borderRadius="2xl"
         borderWidth="1px"
+        borderColor="rgba(255,255,255,0.08)"
+        boxShadow="
+          0 25px 50px rgba(0,0,0,0.55),
+          0 0 20px rgba(34,211,238,0.08)
+        "
       >
-        <Tabs.Root defaultValue="login" colorScheme="cyan" h="100%" w="100%" p={1}>
-          <Tabs.List>
-            <Tabs.Trigger value="login" width="50%" d="flex" justifyContent="center">
+        <Tabs.Root defaultValue="login" colorScheme="cyan" w="100%" p={2}>
+          <Tabs.List
+            borderColor="rgba(255,255,255,0.08)"
+            bg="rgba(255,255,255,0.02)"
+            borderRadius="xl"
+          >
+            <Tabs.Trigger
+              value="login"
+              width="50%"
+              display="flex"
+              justifyContent="center"
+              color="gray.400"
+              fontWeight="bold"
+              _selected={{
+                color: "#22D3EE",
+                borderColor: "#22D3EE",
+              }}
+              _hover={{
+                color: "gray.200",
+              }}
+            >
               Login
             </Tabs.Trigger>
-            <Tabs.Trigger value="signup" width="50%" d="flex" justifyContent="center">
+
+            <Tabs.Trigger
+              value="signup"
+              width="50%"
+              display="flex"
+              justifyContent="center"
+              color="gray.400"
+              fontWeight="bold"
+              _selected={{
+                color: "#22D3EE",
+                borderColor: "#22D3EE",
+              }}
+              _hover={{
+                color: "gray.200",
+              }}
+            >
               Sign Up
             </Tabs.Trigger>
           </Tabs.List>
 
-          <Tabs.Content value="login"><Login /></Tabs.Content>
+          <Tabs.Content value="login">
+            <Login />
+          </Tabs.Content>
 
-          <Tabs.Content value="signup"><Signup /></Tabs.Content>
+          <Tabs.Content value="signup">
+            <Signup />
+          </Tabs.Content>
         </Tabs.Root>
       </Box>
-    </Container>
+    </Box>
   );
-}
+};
 
-export default Homepage
+export default Homepage;

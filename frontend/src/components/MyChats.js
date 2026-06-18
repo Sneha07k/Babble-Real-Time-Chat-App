@@ -2,122 +2,212 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ChatState } from "../Context/ChatProvider";
 import { toaster } from "./ui/toaster";
-import { Box, Button, Stack } from "@chakra-ui/react";
+import { Box, Button, Stack,Spinner } from "@chakra-ui/react";
 import ChatLoading from "./ChatLoading";
 import { Text } from "@chakra-ui/react";
 import { getSender } from "../config/ChatLogics";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
+import { Avatar } from "@chakra-ui/react";
 
-const MyChats = ({fetchAgain}) => {
+const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState();
+  const [loading, setLoading] = useState(false);
 
   const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
 
-  const fetchChats = async () => {
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
+ const fetchChats = async () => {
+   try {
+     setLoading(true);
 
-      const { data } = await axios.get("/api/chat", config);
-      console.log(data);
-      setChats(data);
-    } catch (error) {
-      toaster.create({
-        title: "Error Occurred",
-        type: "error",
-        description: "Failed to load the chats",
-      });
-    }
-  };
+     const config = {
+       headers: {
+         Authorization: `Bearer ${user.token}`,
+       },
+     };
+
+     const { data } = await axios.get("/api/chat", config);
+
+     setChats(data);
+   } catch (error) {
+     toaster.create({
+       title: "Error Occurred",
+       type: "error",
+       description: "Failed to load the chats",
+     });
+   } finally {
+     setLoading(false);
+   }
+ };
 
   useEffect(() => {
     if (user) {
       setLoggedUser(user);
       fetchChats();
     }
-  }, [fetchAgain]);
+  }, [user, fetchAgain]);
 
- return (
-   <Box
-     display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
-     flexDir="column"
-    //  alignItems="center"
-     p={3}
-     bg="gray.900"
-     height="86vh"
-     w={{ base: "100%", md: "31%" }}
-     borderRadius="lg"
-   >
-     <Box
-       display="flex"
-       alignItems="center"
-       justifyContent="space-between"
-       pb={3}
-     >
-       <Box
-         //  pb={3}
-         //  px={3}
-         pl={3}
-         fontSize={{ base: "28px", md: "30px" }}
-         fontFamily="Work sans"
-         d="flex"
-         w="100%"
-         justifyContent="space-between"
-         alignItems="center"
-       >
-         My Chats
-       </Box>
-       <GroupChatModal>
-         <Button>
-           New Group Chat
-           <i class="fa-solid fa-plus"></i>
-         </Button>
-       </GroupChatModal>
-     </Box>
+  if (!user || !loggedUser) {
+    return null;
+  }
 
-     <Box
-       d="flex"
-       flexDir="column"
-       p={7}
-       bg="gray.700"
-       w="100%"
-       h="88%"
-       borderRadius="lg"
-       overflowY="hidden"
-     >
-       {chats ? (
-         <Stack overflowY="scroll">
-           {chats.map((chat) => (
-             <Box
-               onClick={() => setSelectedChat(chat)}
-               cursor="pointer"
-               bg={selectedChat === chat ? "#38B2AC" : "#E8E8E8"}
-               color={selectedChat === chat ? "white" : "black"}
-               _hover={{
-                 bg: "green.500",
-                 color: "white",
-               }}
-               py={2}
-               borderRadius="lg"
-               key={chat._id}
-             >
-               <Text px={4}>
-                 {!chat.isGroupChat
-                   ? getSender(loggedUser, chat.users)
-                   : chat.chatName}
-               </Text>
-             </Box>
-           ))}
-         </Stack>
-       ) : (
-         <ChatLoading />
-       )}
-     </Box>
-   </Box>
- );
+  return (
+    <Box
+      display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
+      flexDir="column"
+      p={4}
+      bg="rgba(8,12,28,0.95)"
+      backdropFilter="blur(12px)"
+      h="97.5%"
+      w={{ base: "100%", md: "31%" }}
+      borderRadius="20px"
+      border="1px solid"
+      borderColor="rgba(0,255,255,0.08)"
+      boxShadow="0 8px 30px rgba(0,0,0,0.45)"
+    >
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        pb={4}
+        px={2}
+      >
+        <Box
+          fontSize={{ base: "28px", md: "32px" }}
+          fontWeight="700"
+          color="white"
+          letterSpacing="-0.5px"
+        >
+          My Chats
+        </Box>
+
+        <GroupChatModal>
+          <Button
+            size="sm"
+            bg="white"
+            color="gray.800"
+            borderRadius="12px"
+            fontWeight="600"
+            px={4}
+            _hover={{
+              bg: "gray.100",
+              transform: "translateY(-1px)",
+            }}
+          >
+            New Group Chat
+            <i className="fa-solid fa-plus" style={{ marginLeft: "8px" }}></i>
+          </Button>
+        </GroupChatModal>
+      </Box>
+
+      <Box
+        display="flex"
+        flexDir="column"
+        p={3}
+        bg="rgba(255,255,255,0.02)"
+        w="100%"
+        h="88%"
+        borderRadius="18px"
+        overflow="hidden"
+      >
+        {loading ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            h="100%"
+          >
+            <Spinner size="xl" color="#22D3EE" borderWidth="4px" />
+          </Box>
+        ) : (
+          <Stack
+            overflowY="auto"
+            gap={2}
+            css={{
+              "&::-webkit-scrollbar": {
+                width: "6px",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                background: "#22d3ee",
+                borderRadius: "10px",
+              },
+            }}
+          >
+            {chats.map((chat) => (
+              <Box
+                key={chat._id}
+                onClick={() => setSelectedChat(chat)}
+                cursor="pointer"
+                bg={
+                  selectedChat?._id === chat._id
+                    ? "rgba(34,211,238,0.22)"
+                    : "rgba(255,255,255,0.03)"
+                }
+                color="white"
+                _hover={{
+                  bg:
+                    selectedChat?._id === chat._id
+                      ? "rgba(34,211,238,0.28)"
+                      : "rgba(255,255,255,0.06)",
+                }}
+                borderRadius="16px"
+                px={4}
+                py={2}
+                transition="all 0.2s ease"
+                border="1px solid"
+                borderColor={
+                  selectedChat?._id === chat._id
+                    ? "rgba(34,211,238,0.25)"
+                    : "transparent"
+                }
+              >
+                <Box display="flex" alignItems="center" gap={3}>
+                  <Avatar.Root
+                    size="sm"
+                    border="2px solid rgba(255,255,255,0.1)"
+                  >
+                    <Avatar.Image
+                      src={
+                        !chat.isGroupChat
+                          ? chat.users.find((u) => u._id !== loggedUser._id)
+                              ?.picture
+                          : undefined
+                      }
+                    />
+
+                    <Avatar.Fallback
+                      name={
+                        !chat.isGroupChat
+                          ? getSender(loggedUser, chat.users)
+                          : chat.chatName
+                      }
+                    />
+                  </Avatar.Root>
+
+                  <Box overflow="hidden" flex="1">
+                    <Text fontWeight="600" fontSize="md" color="white">
+                      {!chat.isGroupChat
+                        ? getSender(loggedUser, chat.users)
+                        : chat.chatName}
+                    </Text>
+
+                    <Text
+                      fontSize="sm"
+                      color="gray.400"
+                      overflow="hidden"
+                      whiteSpace="nowrap"
+                      textOverflow="ellipsis"
+                    >
+                      {chat.latestMessage?.content || "No messages yet"}
+                    </Text>
+                  </Box>
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Box>
+    </Box>
+  );
 };
 
 export default MyChats;
