@@ -91,7 +91,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       setMessages(data);
       setLoading(false);
 
-      socket.emit("join chat", selectedChat._id);
+      // socket.emit("join chat", selectedChat._id);
     } catch (err) {
       console.log(err);
       setLoading(false);
@@ -99,8 +99,16 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   };
 
   useEffect(() => {
-    fetchMessages();
+    if (selectedChat?._id) {
+      socket.emit("join chat", selectedChat._id);
+    }
+  }, [selectedChat]);
+
+  
+  useEffect(() => {
     selectedChatCompare.current = selectedChat;
+    fetchMessages();
+
   }, [selectedChat]);
 
   const fetchAISuggestions = async () => {
@@ -357,7 +365,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     return () => {
       socket.off("message received", handleMessageReceived);
     };
-  }, [setNotification]);
+  }, []);
 
 
   return (
