@@ -7,7 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
-
+const path= require('path')
 connectDB = require("./config/db");
 
 dotenv.config();
@@ -20,13 +20,25 @@ app.use("/api/user", userRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/chat", require("./routes/chatRoutes"));
 app.use("/api/ai", require("./routes/aiRoutes"));
-const __dirname1=
 
-app.use(notFound);
-app.use(errorHandler);
-app.get("/", (req, res) => {
-  res.send("API is running");
+// deployment code 
+const __dirname1 = path.resolve();
+if (process.env.NODE_ENV == 'production') {
+ app.use(express.static(path.join(__dirname1, "frontend", "build")));
+app.use((req, res) => {
+  res.sendFile(path.resolve(__dirname1, "frontend", "build", "index.html"));
 });
+}
+else {
+  app.get("/", (req, res) => {
+    res.send("API is running");
+  });
+}
+  // deployment code
+
+  app.use(notFound);
+app.use(errorHandler);
+
 
 app.get("/api/chat", (req, res) => {
   res.send(chats);
@@ -58,8 +70,6 @@ io.on("connection", (socket) => {
 
   socket.on("join chat", (room) => {
     socket.join(room);
-
-    console.log("User Joined room => " + room);
   });
 
   socket.on("typing", (room) => {
