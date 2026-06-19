@@ -57,7 +57,7 @@ const server = app.listen(5000, console.log(`Server Started at port  ${PORT}`));
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://babble-cf3w.onrender.com",
   },
 });
 
