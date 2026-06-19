@@ -1,34 +1,31 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChatState } from "../Context/ChatProvider";
-import { Box, IconButton, Spinner, Text } from "@chakra-ui/react";
+import { Box, Spinner, Text, Input, IconButton,Button,Avatar } from "@chakra-ui/react";
 import { getSender } from "../config/ChatLogics";
-import ProfileModal from "./miscellaneous/ProfileModal";
-import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
-import { Field, Input } from "@chakra-ui/react";
 import axios from "axios";
-import { toaster } from "./ui/toaster";
 import "./styles.css";
 import ScorllableChat from "../components/ScorllableChat";
 import io from "socket.io-client";
 import Lottie from "react-lottie";
 import animationData from "../animation/Pudgy work.json";
+import EmojiPicker from "emoji-picker-react";
+import ProfileModal from "../components/miscellaneous/ProfileModal";
+import UpdateGroupChatModal from "../components/miscellaneous/UpdateGroupChatModal";
+import CatchUpSidebar from "../components/miscellaneous/CatchUpSidebar";
+
+
 
 const ENDPOINT = "http://localhost:5000";
-
 let socket;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
-  const {
-    user,
-    selectedChat,
-    setSelectedChat,
-    notification,
-    setNotification,
-    chats,
-    setChats,
-  } = ChatState();
+  const { user, selectedChat, setNotification, setChats,setSelectedChat } = ChatState();
 
   const selectedChatCompare = useRef();
+  const suggestionRef = useRef();
+  const aiContainerRef = useRef();
+  const emojiPickerRef = useRef();
+  const emojiButtonRef = useRef();
 
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -36,15 +33,22 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [open, setOpen] = useState(false);
+  // const [selectedChat, setSelectedChat] = useState();
+
+  const [aiSuggestion, setAiSuggestion] = useState([]);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const [activeSuggestion, setActiveSuggestion] = useState(-1);
+  const [showSummary, setShowSummary] = useState(false);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [summary, setSummary] = useState(null);
 
   const defaultOptions = {
     loop: true,
-
     autoplay: true,
-
-    animationData: animationData,
-
+    animationData,
     rendererSettings: {
       preserveAspectRatio: "xMidYMid slice",
     },
@@ -55,22 +59,152 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     socket.emit("setup", user);
 
-    socket.on("connected", () => {
-      setSocketConnected(true);
-    });
+    socket.on("connected", () => setSocketConnected(true));
+    socket.on("typing", () => setIsTyping(true));
+    socket.on("stop typing", () => setIsTyping(false));
 
-    socket.on("typing", () => {
-      setIsTyping(true);
-    });
+    return () => socket.disconnect();
+  }, [user]);
 
-    socket.on("stop typing", () => {
-      setIsTyping(false);
-    });
+  useEffect(() => {
+    setActiveSuggestion(-1);
+  }, [aiSuggestion]);
+
+  const fetchMessages = async () => {
+    if (!selectedChat?._id) return;
+
+    try {
+      setLoading(true);
+
+      const config = {
+        headers: { Authorization: `Bearer ${user.token}` },
+      };
+
+      const { data } = await axios.get(
+        `/api/messages/${selectedChat._id}`,
+        config,
+      );
+
+      setMessages(data);
+      setLoading(false);
+
+      socket.emit("join chat", selectedChat._id);
+    } catch (err) {
+      console.log(err);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+    selectedChatCompare.current = selectedChat;
+  }, [selectedChat]);
+
+  const fetchAISuggestions = async () => {
+    try {
+      setAiLoading(true);
+
+      const context = messages
+        .slice(-6)
+        .map((m) => m.content)
+        .join("\n");
+
+      const res = await axios.post("/api/ai/replies", {
+        message: context,
+      });
+
+      setAiSuggestion(res.data || []);
+    } catch (err) {
+      console.log(err);
+      setAiSuggestion([]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleCatchUp = async () => {
+    try {
+      setLoadingSummary(true);
+
+      const { data } = await axios.post(
+        "/api/ai/summarize",
+        {
+          messages: messages.map((m) => ({
+            sender: m.sender.name,
+            content: m.content,
+          })),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        },
+      );
+
+      setSummary(data);
+      setShowSummary(true);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        aiContainerRef.current &&
+        !aiContainerRef.current.contains(e.target)
+      ) {
+        setAiSuggestion([]);
+        setActiveSuggestion(-1);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      socket.disconnect();
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [user]);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(e.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(e.target) &&
+        emojiButtonRef.current &&
+        !emojiButtonRef.current.contains(e.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
 
   const sendMessage = async (event) => {
     if (event.key === "Enter" && newMessage) {
@@ -80,88 +214,81 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         const config = {
           headers: {
             "Content-Type": "application/json",
-
             Authorization: `Bearer ${user.token}`,
           },
         };
 
         const { data } = await axios.post(
           "/api/messages",
-
           {
             content: newMessage,
-
             chatId: selectedChat._id,
           },
-
           config,
         );
 
         setNewMessage("");
+        setAiSuggestion([]);
+        setActiveSuggestion(-1);
+        setShowEmojiPicker(false);
 
         socket.emit("new message", data);
 
         setMessages((prev) => [...prev, data]);
-       setChats((prevChats) =>
-         prevChats.map((chat) =>
-           chat._id === data.chat._id ? { ...chat, latestMessage: data } : chat,
-         ),
-       );
-       
-      } catch (error) {
-        toaster.create({
-          title: "Error occurred",
 
-          type: "error",
-        });
+        setChats((prevChats) =>
+          prevChats.map((chat) =>
+            chat._id === data.chat._id
+              ? { ...chat, latestMessage: data }
+              : chat,
+          ),
+        );
+      } catch (error) {
+        console.log(error);
       }
     }
   };
 
-  const fetchMessages = async () => {
-    if (!selectedChat?._id) return;
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      if (activeSuggestion >= 0 && aiSuggestion.length > 0) {
+        setNewMessage(aiSuggestion[activeSuggestion]);
+        setAiSuggestion([]);
+        setActiveSuggestion(-1);
+        return;
+      }
+      sendMessage(e);
+    }
 
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      };
-
-      setLoading(true);
-
-      const { data } = await axios.get(
-        `/api/messages/${selectedChat._id}`,
-
-        config,
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveSuggestion((prev) =>
+        prev < aiSuggestion.length - 1 ? prev + 1 : 0,
       );
+    }
 
-      setMessages(data);
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveSuggestion((prev) =>
+        prev > 0 ? prev - 1 : aiSuggestion.length - 1,
+      );
+    }
 
-      setLoading(false);
-
-      socket.emit("join chat", selectedChat._id);
-    } catch (error) {
-      console.log(error);
-
-      setLoading(false);
+    if (e.key === "Escape") {
+      setAiSuggestion([]);
+      setActiveSuggestion(-1);
     }
   };
 
-  useEffect(() => {
-    fetchMessages();
-
-    selectedChatCompare.current = selectedChat;
-  }, [selectedChat]);
-
   const typingHandler = (e) => {
     setNewMessage(e.target.value);
+    setAiSuggestion([]);
+    setActiveSuggestion(-1);
 
     if (!socketConnected) return;
 
     if (!typing) {
       setTyping(true);
-
       socket.emit("typing", selectedChat._id);
     }
 
@@ -169,62 +296,59 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     setTimeout(() => {
       let timeNow = new Date().getTime();
-
       let timeDifference = timeNow - lastTypingTime;
 
       if (timeDifference >= 3000 && typing) {
         socket.emit("stop typing", selectedChat._id);
-
         setTyping(false);
       }
     }, 3000);
   };
 
   useEffect(() => {
-  const handleMessageReceived = (newMessageReceived) => {
-    const currentChatId = selectedChatCompare.current?._id;
-    const incomingChatId = newMessageReceived.chat._id;
+    const handleMessageReceived = (newMessageReceived) => {
+      const currentChatId = selectedChatCompare.current?._id;
+      const incomingChatId = newMessageReceived.chat._id;
 
-    const isCurrentChatOpen = currentChatId === incomingChatId;
+      const isCurrentChatOpen = currentChatId === incomingChatId;
 
-   
-    if (!isCurrentChatOpen) {
-      setNotification((prev) => {
-        const alreadyExists = prev.some(
-          (msg) => msg._id === newMessageReceived._id,
+      if (!isCurrentChatOpen) {
+        setNotification((prev) => {
+          const alreadyExists = prev.some(
+            (msg) => msg._id === newMessageReceived._id,
+          );
+
+          if (alreadyExists) return prev;
+
+          return [newMessageReceived, ...prev];
+        });
+      }
+
+      if (isCurrentChatOpen) {
+        setMessages((prev) => [...prev, newMessageReceived]);
+      }
+
+      // 3. ALWAYS update chats (IMPORTANT FIX)
+      setChats((prevChats) => {
+        const chatIndex = prevChats.findIndex(
+          (chat) => chat._id === incomingChatId,
         );
 
-        if (alreadyExists) return prev;
+        if (chatIndex === -1) return prevChats;
 
-        return [newMessageReceived, ...prev];
+        const updatedChat = {
+          ...prevChats[chatIndex],
+          latestMessage: newMessageReceived,
+        };
+
+        const newChats = [...prevChats];
+
+        newChats.splice(chatIndex, 1);
+        newChats.unshift(updatedChat);
+
+        return newChats;
       });
-    }
-
-    if (isCurrentChatOpen) {
-      setMessages((prev) => [...prev, newMessageReceived]);
-    }
-
-    // 3. ALWAYS update chats (IMPORTANT FIX)
-    setChats((prevChats) => {
-      const chatIndex = prevChats.findIndex(
-        (chat) => chat._id === incomingChatId,
-      );
-
-      if (chatIndex === -1) return prevChats;
-
-      const updatedChat = {
-        ...prevChats[chatIndex],
-        latestMessage: newMessageReceived,
-      };
-
-      const newChats = [...prevChats];
-
-      newChats.splice(chatIndex, 1);
-      newChats.unshift(updatedChat);
-
-      return newChats;
-    });
-  };
+    };
 
     socket.on("message received", handleMessageReceived);
 
@@ -232,6 +356,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       socket.off("message received", handleMessageReceived);
     };
   }, [setNotification]);
+
 
   return (
     <>
@@ -243,19 +368,21 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             px={2}
             pr={4}
             w="100%"
-            fontFamily="Work sans"
             display="flex"
             justifyContent="space-between"
             alignItems="center"
           >
-            <IconButton
-              aria-label="Back"
-              mr="10px"
-              display={{ base: "flex", md: "none" }}
+            <Text
+              cursor="pointer"
+              fontSize="24px"
+              color="gray.300"
+              _hover={{ color: "white" }}
+              display={{ base: "block", md: "none" }}
               onClick={() => setSelectedChat(null)}
+              p={3}
             >
-              <i className="fa-solid fa-arrow-left-long"></i>
-            </IconButton>
+              ←
+            </Text>
 
             {!selectedChat.isGroupChat ? (
               <Box
@@ -264,36 +391,97 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 justifyContent="space-between"
                 w="100%"
               >
-                <Box>
-                  <Text>{getSender(user, selectedChat.users)}</Text>
-                </Box>
-
-                <Box>
-                  <Text
-                    cursor="pointer"
-                    color="blue.300"
-                    onClick={() => setOpen(true)}
-                  >
-                    <i className="fa-solid fa-circle-user"></i>
-                  </Text>
-
-                  <ProfileModal
-                    user={selectedChat.users.find((u) => u._id !== user._id)}
-                    open={open}
-                    setOpen={setOpen}
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  gap={3}
+                  cursor="pointer"
+                  onClick={() => setOpen(true)}
+                >
+                  <img
+                    src={
+                      selectedChat.users.find((u) => u._id !== user._id)
+                        ?.picture
+                    }
+                    alt="profile"
+                    style={{
+                      width: "42px",
+                      height: "42px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      border: "2px solid #4a5568",
+                    }}
                   />
+
+                  <Text fontSize="lg" fontWeight="600" color="white">
+                    {getSender(user, selectedChat.users)}
+                  </Text>
                 </Box>
+
+                <Box display="flex" alignItems="center" gap={3}>
+                  <button
+                    onClick={handleCatchUp}
+                    style={{
+                      padding: "8px 12px",
+                      borderRadius: "999px",
+                      background: "#1cb2c9",
+                      color: "white",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      border: "none",
+                      transition: "all 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#18a3b8";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#1cb2c9";
+                    }}
+                  >
+                    <i className="fa-solid fa-newspaper"></i>
+                  </button>
+                </Box>
+
+                <ProfileModal
+                  user={selectedChat.users.find((u) => u._id !== user._id)}
+                  open={open}
+                  setOpen={setOpen}
+                />
               </Box>
             ) : (
-              <>
-                <span>{selectedChat.chatName.toUpperCase()}</span>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                w="100%"
+              >
+                <Box display="flex" alignItems="center" gap={3}>
+                  <UpdateGroupChatModal
+                    fetchAgain={fetchAgain}
+                    setFetchAgain={setFetchAgain}
+                    fetchMessages={fetchMessages}
+                  />
 
-                <UpdateGroupChatModal
-                  fetchAgain={fetchAgain}
-                  setFetchAgain={setFetchAgain}
-                  fetchMessages={fetchMessages}
-                />
-              </>
+                  <Text>{selectedChat.chatName}</Text>
+                </Box>
+
+                <button
+                  onClick={handleCatchUp}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "999px",
+                    background: "#1cb2c9",
+                    color: "white",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    border: "none",
+                  }}
+                >
+                  <i className="fa-solid fa-newspaper"></i>
+                </button>
+              </Box>
             )}
           </Text>
 
@@ -308,57 +496,172 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             overflow="hidden"
           >
             {loading ? (
-              <Spinner
-                size="xl"
-                w={20}
-                h={20}
-                alignSelf="center"
-                margin="auto"
-              />
+              <Spinner size="xl" alignSelf="center" />
             ) : (
               <Box flex="1" overflow="hidden">
                 <ScorllableChat messages={messages} />
               </Box>
             )}
 
-            <Field.Root mt={3}>
-              {isTyping && (
-                <Lottie
-                  options={defaultOptions}
-                  width={70}
-                  style={{
-                    marginBottom: 15,
+            {isTyping && (
+              <Box display="flex" mt={2}>
+                <Box width="60px" height="60px">
+                  <Lottie options={defaultOptions} width={60} height={60} />
+                </Box>
+              </Box>
+            )}
 
-                    transform: "scaleX(-1)",
-                  }}
+            <Box mt={3} display="flex" alignItems="center" gap={2}>
+              <Box
+                position="relative"
+                flex="1"
+                display="flex"
+                alignItems="center"
+                gap={2}
+              >
+                {(aiSuggestion.length > 0 || aiLoading) && (
+                  <Box
+                    ref={aiContainerRef}
+                    position="absolute"
+                    bottom="100%"
+                    left="0"
+                    right="0"
+                    mb="8px"
+                    bg="gray.700"
+                    borderRadius="10px"
+                    p={2}
+                    zIndex={1000}
+                  >
+                    {aiLoading && (
+                      <Text fontSize="sm" color="gray.400">
+                        AI is thinking...
+                      </Text>
+                    )}
+
+                    {aiSuggestion.map((r, i) => (
+                      <Text
+                        key={i}
+                        cursor="pointer"
+                        bg={i === activeSuggestion ? "gray.600" : "transparent"}
+                        px={2}
+                        py={1}
+                        borderRadius="6px"
+                        _hover={{ color: "#22d3ee" }}
+                        color="white"
+                        fontSize="sm"
+                        mb={1}
+                        onMouseEnter={() => setActiveSuggestion(i)}
+                        onClick={() => {
+                          setNewMessage(r);
+                          setAiSuggestion([]);
+                          setActiveSuggestion(-1);
+                        }}
+                      >
+                        {r}
+                      </Text>
+                    ))}
+                  </Box>
+                )}
+
+                {showEmojiPicker && (
+                  <Box
+                    ref={emojiPickerRef}
+                    position="absolute"
+                    bottom="60px"
+                    left="0"
+                    zIndex={2000}
+                  >
+                    <EmojiPicker
+                      onEmojiClick={(emojiData) => {
+                        setNewMessage((prev) => prev + emojiData.emoji);
+                      }}
+                    />
+                  </Box>
+                )}
+
+                <Input
+                  placeholder="Enter a message...."
+                  variant="filled"
+                  bg="#383333"
+                  value={newMessage}
+                  onChange={typingHandler}
+                  onKeyDown={handleKeyDown}
                 />
-              )}
 
-              <Input
-                placeholder="Enter a message...."
-                variant="filled"
-                bg="#383333"
-                onChange={typingHandler}
-                value={newMessage}
-                onKeyDown={sendMessage}
-              />
-            </Field.Root>
+                <button
+                  ref={emojiButtonRef}
+                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                  style={{
+                    padding: "10px",
+                    borderRadius: "8px",
+                    background: "#333",
+                    color: "white",
+                    cursor: "pointer",
+                  }}
+                >
+                  😊
+                </button>
+              </Box>
+
+              <button
+                onClick={fetchAISuggestions}
+                style={{
+                  padding: "8px 14px",
+                  borderRadius: "999px",
+                  background: "rgba(59, 130, 246, 0.08)",
+                  color: "#e5e7eb",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  border: "1px solid rgba(96, 165, 250, 0.15)",
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(16, 185, 129, 0.12)";
+                  e.currentTarget.style.borderColor = "#10b981";
+                  e.currentTarget.style.color = "#d1fae5";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(59, 130, 246, 0.08)";
+                  e.currentTarget.style.borderColor =
+                    "rgba(109, 168, 240, 0.53)";
+                  e.currentTarget.style.color = "#e5e7eb";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                <i className="fa-solid fa-wand-magic-sparkles"></i>
+                Ask AI
+              </button>
+            </Box>
           </Box>
         </>
       ) : (
         <Box
           display="flex"
-          alignItems="center"
           justifyContent="center"
-          h="100%"
+          alignItems="center"
+          height="100%"
+          width="100%"
         >
-          <Text fontSize="3xl" pb={3} fontFamily="Work Sans">
-            Click on a user to start chatting
+          <Text fontSize="2xl" fontWeight="600" color="gray.400">
+            Select a chat to start texting
           </Text>
         </Box>
       )}
+      <CatchUpSidebar
+        isOpen={showSummary}
+        onClose={() => setShowSummary(false)}
+        summary={summary}
+      />
     </>
   );
+  
 };
 
 export default SingleChat;

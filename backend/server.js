@@ -1,14 +1,17 @@
+require("dotenv").config({ override: true });
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
 const { chats } = require("./data/data");
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 connectDB = require("./config/db");
 
 dotenv.config();
+
 connectDB();
 
 app.use(express.json());
@@ -17,6 +20,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/chat", require("./routes/chatRoutes"));
 app.use("/api/ai", require("./routes/aiRoutes"));
+const __dirname1=
 
 app.use(notFound);
 app.use(errorHandler);

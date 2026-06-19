@@ -104,13 +104,27 @@ const GroupChatModal = ({ children }) => {
     <Dialog.Root>
       <Dialog.Trigger asChild>
         <Button
-          variant="outline"
           size="sm"
-          backgroundColor={"white"}
-          color={"black"}
+          bg="gray.700"
+          color="white"
+          borderRadius="999px"
+          px={5}
+          border="1px solid"
+          borderColor="gray.600"
+          fontWeight="600"
+          transition="all 0.2s ease"
+          _hover={{
+            bg: "gray.600",
+            borderColor: "#1cb2c9",
+            boxShadow: "0 0 15px rgba(28,178,201,0.2)",
+            transform: "translateY(-1px)",
+          }}
         >
-          New Group Chat
-          <i class="fa-solid fa-plus"></i>
+          <i
+            className="fa-solid fa-user-group"
+            style={{ marginRight: "8px" }}
+          />
+          New Group
         </Button>
       </Dialog.Trigger>
       <Portal>
