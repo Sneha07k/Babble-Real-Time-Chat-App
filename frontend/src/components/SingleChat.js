@@ -15,11 +15,11 @@ import CatchUpSidebar from "../components/miscellaneous/CatchUpSidebar";
 
 
 
-const ENDPOINT = "http://localhost:5000";
+const ENDPOINT = "https://babble-cf3w.onrender.com";
 let socket;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
-  const { user, selectedChat, setNotification, setChats,setSelectedChat } = ChatState();
+  const { user, selectedChat, setNotification, setChats, setSelectedChat } = ChatState();
 
   const selectedChatCompare = useRef();
   const suggestionRef = useRef();
@@ -54,6 +54,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     },
   };
 
+
+
   useEffect(() => {
     socket = io(ENDPOINT);
 
@@ -65,6 +67,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     return () => socket.disconnect();
   }, [user]);
+
 
   useEffect(() => {
     setActiveSuggestion(-1);
@@ -328,7 +331,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         setMessages((prev) => [...prev, newMessageReceived]);
       }
 
-      // 3. ALWAYS update chats (IMPORTANT FIX)
       setChats((prevChats) => {
         const chatIndex = prevChats.findIndex(
           (chat) => chat._id === incomingChatId,
