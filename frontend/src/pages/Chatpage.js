@@ -14,7 +14,7 @@ const Chatpage = () => {
     <div
       style={{
         width: "100%",
-        height: "100vh",
+        height: "100dvh",
         overflow: "hidden",
       }}
     >
@@ -24,7 +24,7 @@ const Chatpage = () => {
         display="flex"
         justifyContent="space-between"
         w="100%"
-        h="calc(100vh - 70px)"
+        h="calc(100dvh - 70px)"
         p="10px"
         overflow="hidden"
       >

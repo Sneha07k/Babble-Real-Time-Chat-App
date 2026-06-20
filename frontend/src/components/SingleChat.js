@@ -501,14 +501,15 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             p={3}
             bg="gray.800"
             w="100%"
-            height="calc(100vh - 150px)"
+            height="100%"
             borderRadius="lg"
+            minH={0}
             overflow="hidden"
           >
             {loading ? (
               <Spinner size="xl" alignSelf="center" />
             ) : (
-              <Box flex="1" overflow="hidden">
+              <Box flex="1" minH={0} overflow="hidden">
                 <ScorllableChat messages={messages} />
               </Box>
             )}
