@@ -81,11 +81,6 @@ Babble is a full-stack real-time chat application built using the MERN stack and
 ## 🌐 Live Demo
 
 🚀 Try Babble here: **https://babble-cf3w.onrender.com**
-- Demo Account 1 : rossgeller@gmail.com
-- Demo Account's password: dinosaur
-- Demo Account 2: joeytribiani@gmail.com
-- Demo Account's password: sandwich
-- Users can also create their own accounts to test one-to-one chats, group conversations, and real-time features firsthand.
 
 > Note: The application may take 30–60 seconds to load on the first visit if the Render service is waking up from inactivity.
 > 
