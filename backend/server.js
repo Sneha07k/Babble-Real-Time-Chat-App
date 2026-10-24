@@ -1,6 +1,13 @@
 // real environment variables (e.g. set on Render) win over the .env file
 require("dotenv").config();
 
+// tolerate "Production", stray spaces or quotes typed into a hosting dashboard
+process.env.NODE_ENV = (process.env.NODE_ENV || "development")
+  .trim()
+  .replace(/^["']|["']$/g, "")
+  .toLowerCase();
+console.log(`Starting in ${process.env.NODE_ENV} mode`);
+
 // fail fast with a clear message instead of crashing later
 const missing = ["MONGO_URI", "JWT_SECRET"].filter((key) => !process.env[key]);
 if (missing.length) {
