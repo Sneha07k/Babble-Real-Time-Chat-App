@@ -1,8 +1,10 @@
 // real environment variables (e.g. set on Render) win over the .env file
 require("dotenv").config();
 
-// tolerate "Production", stray spaces or quotes typed into a hosting dashboard
-process.env.NODE_ENV = (process.env.NODE_ENV || "development")
+// tolerate "Production", stray spaces or quotes typed into a hosting dashboard;
+// Render sets RENDER=true on its servers, so production is the default there
+const defaultMode = process.env.RENDER ? "production" : "development";
+process.env.NODE_ENV = (process.env.NODE_ENV || defaultMode)
   .trim()
   .replace(/^["']|["']$/g, "")
   .toLowerCase();
