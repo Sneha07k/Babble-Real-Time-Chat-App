@@ -1,109 +1,132 @@
 # 💬 Babble – AI-Powered Real-Time Chat Application
 
-Babble is a full-stack real-time chat application built using the MERN stack and Socket.IO. It enables users to communicate instantly through one-to-one and group conversations while enhancing the chat experience with AI-powered features such as smart message suggestions and chat summarization.
+Babble is a modern, full-stack real-time messaging application built with the MERN stack, Socket.IO, and Groq AI. It features instant one-to-one and group messaging, rich media sharing, voice notes, live user presence, public community channels, and integrated AI assistance.
+
+![Babble Chat Interface](screenshots/babble-chat.png)
 
 ---
 
-## 🚀 Features
+## 🌐 Live Demo
 
-- 🔐 Secure User Authentication (JWT)
-- 💬 Real-Time One-to-One Messaging
-- 👥 Group Chat Creation and Management
-- ⚡ Instant Message Delivery with Socket.IO
-- ⌨️ Live Typing Indicators
-- 🔔 Real-Time Notifications
-- 😊 Emoji Picker Integration
-- 🤖 AI-Powered Message Suggestions
-- 📝 AI Chat Summarization
-- 🔍 User Search Functionality
-- 👤 Profile Management
-- 📱 Fully Responsive User Interface
+🚀 **Try Babble live:** [https://babble-cf3w.onrender.com](https://babble-cf3w.onrender.com)
+
+> *Note: If the application hasn't been accessed recently, please allow 30–60 seconds for Render to wake up the free-tier service.*
+
+---
+
+## 🚀 Key Features
+
+### 💬 Real-Time Messaging & Media
+- **Instant Messaging:** Real-time delivery with Socket.IO and live typing indicators.
+- **Media & Voice Notes:** Send images, videos, and record audio voice notes directly inside the chat (powered by Cloudinary).
+- **Group Chats & Communities:** Create group conversations with custom icons, manage members, or explore public community rooms (Food, Tech, Random, etc.).
+- **Live User Presence:** Real-time online/offline indicators with automated heartbeat checks.
+- **Day Dividers & Timestamps:** WhatsApp-style clustered message bubbles with date separators and delivery checkmarks.
+
+### 🤖 AI Assistance (Groq API)
+- **Babble AI Contact:** An in-app AI assistant ready to answer questions, explain concepts, or brainstorm ideas directly within the chat.
+- **Smart Reply Suggestions ("Ask AI"):** Generates quick, contextual response suggestions with one click.
+- **Catch-Up Summarizer:** Summarizes unread and long chat histories into structured key takeaways and action points.
+
+### 🔐 Authentication & Onboarding
+- **Email & Password + OTP:** Sign up with email verification via one-time password (OTP) emails.
+- **Google Sign-In:** Seamless single-click authentication using Google OAuth.
+- **Personal Invite Links & QR Codes:** Share personal invite codes or scan QR codes to instantly connect with friends.
+- **Password Hashing & JWT:** Passwords secured with bcrypt and sessions managed via JWT.
+
+### 🎨 Personalization & UX
+- **Theme Picker:** Choose from multiple curated themes and accent colors.
+- **Chat Search & Filtering:** Filter chats by All, Unread, Groups, or Public Rooms.
+- **Responsive Design:** Optimized for both mobile devices and desktop screens.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- React.js
-- Chakra UI
-- Axios
-- Socket.IO Client
-- Emoji Mart
+- **Framework:** React 19 (bundled with Vite)
+- **UI Components:** Chakra UI v3, Emotion
+- **Networking & Real-Time:** Axios, Socket.IO Client
+- **Auth & Media:** `@react-oauth/google`, Cloudinary, `qrcode.react`
+- **Icons & Animation:** FontAwesome 6, React Icons, React Lottie
 
 ### Backend
-- Node.js
-- Express.js
-- Socket.IO
-- JWT Authentication
-- bcrypt.js
-
-### Database
-- MongoDB
-- Mongoose
-
-### AI Integration
-- Groq API
+- **Runtime:** Node.js, Express.js
+- **Real-Time Engine:** Socket.IO
+- **Database:** MongoDB & Mongoose
+- **Authentication:** JSON Web Tokens (JWT), bcrypt.js, Google Auth Library
+- **Email Delivery:** Nodemailer (OTP verification)
+- **AI Integration:** Groq SDK (`llama-3.3-70b-versatile`)
+- **Security:** Express rate limiters, input sanitization, protected routes
 
 ---
 
-## ✨ Key Features
-
-### 🔐 Authentication & Security
-- User registration and login
-- Password hashing using bcrypt
-- JWT-based authentication and authorization
-- Protected routes and secure API access
-
-### 💬 Real-Time Communication
-- Instant messaging using Socket.IO
-- Live typing indicators
-- Real-time notifications for incoming messages
-- Seamless chat synchronization across users
-
-### 👥 Group Chats
-- Create and manage group conversations
-- Add or remove participants
-- Rename groups dynamically
-- Group admin controls
-
-### 🤖 AI Assistance
-- Context-aware message suggestions
-- AI-generated chat summaries for long conversations
-- Quick insights into chat discussions
-- Enhanced communication experience powered by Groq
-
-### 😊 User Experience
-- Emoji support for expressive conversations
-- Responsive design for desktop and mobile devices
-- Clean and intuitive interface
-  
-
-## 🌐 Live Demo
-
-🚀 Try Babble here: **https://babble-cf3w.onrender.com**
-
-> Note: The application may take 30–60 seconds to load on the first visit if the Render service is waking up from inactivity.
-> 
-
 ## 📸 Screenshots
 
-### Login Page
-<img width="640" height="316" alt="image" src="https://github.com/user-attachments/assets/98a17e22-02df-43ed-aee4-5412c54f0c30" />
+### Chat Interface with Media & AI
+![Babble Chat Interface](screenshots/babble-chat.png)
 
-### Chat Interface
-<img width="640" height="316" alt="image" src="https://github.com/user-attachments/assets/cfbb3ecd-37c7-4a6e-ab2e-09fbd459f234" />
+### Login & Authentication
+<img width="640" height="316" alt="Login Page" src="https://github.com/user-attachments/assets/98a17e22-02df-43ed-aee4-5412c54f0c30" />
 
-### Group Chat
-<img width="640" height="314" alt="image" src="https://github.com/user-attachments/assets/451ec86c-e2c3-462a-9c5d-6cd2610b4f8b" />
+### Group Chat Management
+<img width="640" height="314" alt="Group Chat" src="https://github.com/user-attachments/assets/451ec86c-e2c3-462a-9c5d-6cd2610b4f8b" />
 
-### AI Suggestions and Notification feature
-<img width="639" height="314" alt="image" src="https://github.com/user-attachments/assets/bc1f96b6-a699-4541-83b1-29e84a5290ea" />
+### AI Message Suggestions
+<img width="639" height="314" alt="AI Suggestions" src="https://github.com/user-attachments/assets/bc1f96b6-a699-4541-83b1-29e84a5290ea" />
 
-### AI Chat Summary
-<img width="640" height="314" alt="image" src="https://github.com/user-attachments/assets/4638fd33-5e4b-47b7-9ce8-e3a113aaa727" />
+### AI Chat Summarizer (Catch-Up)
+<img width="640" height="314" alt="AI Chat Summary" src="https://github.com/user-attachments/assets/4638fd33-5e4b-47b7-9ce8-e3a113aaa727" />
 
+---
 
+## 💻 Getting Started Locally
 
-Babble combines real-time communication with AI-powered assistance to make conversations smarter, faster, and more engaging. Whether it's personal messaging or collaborative group discussions, Babble delivers a modern chat experience with the power of intelligent automation.
+### Prerequisites
+- Node.js (v18+)
+- MongoDB connection string (local or MongoDB Atlas)
+- Groq API key (free at [console.groq.com](https://console.groq.com))
 
-⭐ If you found this project interesting, consider giving it a star!
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Sneha07k/Babble-Real-Time-Chat-App.git
+cd Babble-Real-Time-Chat-App
+```
+
+### 2. Configure Environment Variables
+Copy `.env.example` in both root and frontend folders:
+```bash
+cp .env.example .env
+cp frontend/.env.example frontend/.env
+```
+Fill in your credentials in `.env` (MongoDB URI, JWT secret, Groq API key, etc.).
+
+### 3. Install Dependencies
+```bash
+# Install backend dependencies
+npm install
+
+# Install frontend dependencies
+cd frontend
+npm install
+cd ..
+```
+
+### 4. Run the Application
+In development, run the backend and frontend simultaneously:
+
+```bash
+# Terminal 1: Backend (runs on port 5000)
+npm run start
+
+# Terminal 2: Frontend (runs on port 3000 via Vite)
+cd frontend
+npm start
+```
+
+Visit `http://localhost:3000` to use Babble!
+
+---
+
+## 📄 License
+This project is open-source and available under the [MIT License](LICENSE).
