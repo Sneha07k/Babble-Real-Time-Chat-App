@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <!-- same mark as src/components/BabbleLogo.js, with the Ocean Pop colours baked in -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0369a1"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+  <rect x="5" y="3" width="11" height="32" rx="5.5" fill="url(#g)"/>
+  <circle cx="27" cy="28" r="16" fill="url(#g)"/>
+  <path d="M35 40 L46 47 L41.5 34 Z" fill="url(#g)"/>
+  <circle cx="20.5" cy="28" r="2.4" fill="#fff"/>
+  <circle cx="27" cy="28" r="2.4" fill="#fff"/>
+  <circle cx="33.5" cy="28" r="2.4" fill="#fff"/>
+  <circle cx="41" cy="8" r="4" fill="#facc15"/>
+</svg>
