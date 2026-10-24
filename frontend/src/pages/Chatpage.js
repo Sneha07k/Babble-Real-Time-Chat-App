@@ -1,43 +1,44 @@
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
 import { useState } from "react";
 import { Redirect } from "react-router-dom";
 import { ChatState } from "../Context/ChatProvider";
 import { Box } from "@chakra-ui/react";
-import SideDrawer from "../components/miscellaneous/SideDrawer";
 import MyChats from "../components/MyChats";
 import ChatBox from "../components/ChatBox";
 
 const Chatpage = () => {
-  const { user } = ChatState();
+  const { user, selectedChat } = ChatState();
   const [fetchAgain, setFetchAgain] = useState(false);
+  // what the main panel shows when no chat is open: "chats" (welcome) or "explore"
+  const [view, setView] = useState("chats");
 
   if (!user) return <Redirect to="/" />;
 
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100dvh",
-        overflow: "hidden",
-      }}
-    >
-      {user && <SideDrawer />}
+  // on phones only one column fits: the list, or whatever is open
+  const mainOpen = Boolean(selectedChat) || view === "explore";
 
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        w="100%"
-        h="calc(100dvh - 70px)"
-        p="10px"
-        overflow="hidden"
-      >
-        {user && <MyChats fetchAgain={fetchAgain} />}
-        {user && (
-          <ChatBox fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />
-        )}
-      </Box>
-    </div>
+  return (
+    <Box
+      w="100%"
+      h="100dvh"
+      display="flex"
+      gap={{ base: 0, md: 3 }}
+      p={{ base: 0, md: 3 }}
+      overflow="hidden"
+    >
+      <MyChats
+        fetchAgain={fetchAgain}
+        view={view}
+        setView={setView}
+        hiddenOnMobile={mainOpen}
+      />
+      <ChatBox
+        fetchAgain={fetchAgain}
+        setFetchAgain={setFetchAgain}
+        view={view}
+        setView={setView}
+        hiddenOnMobile={!mainOpen}
+      />
+    </Box>
   );
 };
 

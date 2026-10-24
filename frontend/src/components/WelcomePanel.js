@@ -1,76 +1,79 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Button, Input, Spinner, Text } from "@chakra-ui/react";
+import { Box, Button, Input, Text } from "@chakra-ui/react";
 import { QRCodeSVG } from "qrcode.react";
 import { ChatState } from "../Context/ChatProvider";
 import { toaster } from "./ui/toaster";
 
-const cardProps = {
-  display: "flex",
-  flexDir: "column",
-  gap: 3,
-  p: 5,
-  bg: "rgba(255,255,255,0.03)",
-  border: "1px solid",
-  borderColor: "color-mix(in srgb, var(--accent) 12%, transparent)",
-  borderRadius: "18px",
-  color: "white",
-};
-
-const accentButton = {
-  bg: "var(--accent)",
-  color: "var(--on-accent)",
-  fontWeight: "bold",
-  borderRadius: "lg",
-  _hover: { bg: "var(--accent-strong)" },
-};
-
-const CardTitle = ({ icon, children }) => (
-  <Box display="flex" alignItems="center" gap={3}>
-    <Box
-      w="38px"
-      h="38px"
-      borderRadius="12px"
-      bg="color-mix(in srgb, var(--accent) 12%, transparent)"
-      color="var(--accent-light)"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      flexShrink={0}
-    >
-      <i className={icon} />
+const Card = ({ color, icon, title, children }) => (
+  <Box
+    className="babble-pop"
+    display="flex"
+    flexDir="column"
+    gap={3}
+    p={5}
+    bg="rgba(255,255,255,0.04)"
+    border="1px solid rgba(255,255,255,0.08)"
+    borderRadius="24px"
+    color="white"
+    transition="transform 0.15s"
+    _hover={{ transform: "translateY(-3px)" }}
+  >
+    <Box display="flex" alignItems="center" gap={3}>
+      <Box
+        w="46px"
+        h="46px"
+        borderRadius="16px"
+        bg={color}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        fontSize="22px"
+        flexShrink={0}
+        boxShadow="0 6px 18px rgba(0,0,0,0.3)"
+      >
+        {icon}
+      </Box>
+      <Text fontFamily="heading" fontWeight="600" fontSize="xl">
+        {title}
+      </Text>
     </Box>
-    <Text fontWeight="700" fontSize="lg">
-      {children}
-    </Text>
+    {children}
   </Box>
 );
 
+const gradientButton = {
+  bg: "var(--gradient)",
+  color: "white",
+  fontWeight: "700",
+  borderRadius: "full",
+  _hover: { bg: "var(--gradient-hover)" },
+};
+
+const ghostButton = {
+  variant: "outline",
+  color: "white",
+  borderColor: "rgba(255,255,255,0.2)",
+  borderRadius: "full",
+  _hover: { bg: "rgba(255,255,255,0.08)" },
+};
+
 // shown instead of an empty screen: someone to talk to, a way to
-// bring friends in, and rooms that already have people in them
-const WelcomePanel = () => {
+// bring friends in, and rooms full of people to explore
+const WelcomePanel = ({ setView }) => {
   const { user, chats, setChats, setSelectedChat } = ChatState();
 
   const [inviteCode, setInviteCode] = useState("");
   const [showQR, setShowQR] = useState(false);
-  const [rooms, setRooms] = useState([]);
-  const [roomsLoading, setRoomsLoading] = useState(false);
-  const [joiningId, setJoiningId] = useState(null);
+  const [rolling, setRolling] = useState(false);
+
+  const config = { headers: { Authorization: `Bearer ${user.token}` } };
 
   useEffect(() => {
-    const config = { headers: { Authorization: `Bearer ${user.token}` } };
-
     axios
       .get("/api/user/invite", config)
       .then(({ data }) => setInviteCode(data.code))
       .catch(() => setInviteCode(""));
-
-    setRoomsLoading(true);
-    axios
-      .get("/api/chat/community", config)
-      .then(({ data }) => setRooms(data))
-      .catch(() => setRooms([]))
-      .finally(() => setRoomsLoading(false));
   }, [user]);
 
   const inviteLink = inviteCode
@@ -84,7 +87,7 @@ const WelcomePanel = () => {
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(inviteLink);
-      toaster.create({ description: "Invite link copied", type: "success" });
+      toaster.create({ description: "Invite link copied 📋", type: "success" });
     } catch (error) {
       toaster.create({ description: "Couldn't copy the link", type: "error" });
     }
@@ -100,49 +103,27 @@ const WelcomePanel = () => {
       .catch(() => {});
   };
 
-  const openRoom = async (room) => {
-    const existing = chats.find((c) => c._id === room._id);
-    if (existing) {
-      setSelectedChat(existing);
-      return;
-    }
-
+  const surpriseMe = async () => {
     try {
-      setJoiningId(room._id);
-      const { data } = await axios.put(
-        `/api/chat/community/${room._id}/join`,
-        {},
-        { headers: { Authorization: `Bearer ${user.token}` } },
-      );
-      setChats((prev) =>
-        prev.some((c) => c._id === data._id) ? prev : [data, ...prev],
-      );
-      setRooms((prev) =>
-        prev.map((r) =>
-          r._id === room._id && !r.joined
-            ? { ...r, joined: true, memberCount: r.memberCount + 1 }
-            : r,
-        ),
-      );
+      setRolling(true);
+      const { data } = await axios.post("/api/chat/community/random", {}, config);
+      setChats((prev) => (prev.some((c) => c._id === data._id) ? prev : [data, ...prev]));
       setSelectedChat(data);
+      toaster.create({ description: `🎲 You landed in ${data.emoji || ""} ${data.chatName}!`, type: "success" });
     } catch (error) {
-      toaster.create({ description: "Couldn't join the room", type: "error" });
+      toaster.create({ description: error.response?.data?.message || "Couldn't find a room", type: "info" });
     } finally {
-      setJoiningId(null);
+      setRolling(false);
     }
   };
 
   return (
-    <Box w="100%" h="100%" overflowY="auto" px={{ base: 1, md: 4 }} py={4}>
-      <Text
-        fontSize={{ base: "2xl", md: "3xl" }}
-        fontWeight="700"
-        color="white"
-      >
-        Welcome, {user.name.split(" ")[0]} 👋
+    <Box w="100%" h="100%" overflowY="auto" px={{ base: 1, md: 6 }} py={{ base: 2, md: 6 }}>
+      <Text fontFamily="heading" fontSize={{ base: "3xl", md: "4xl" }} fontWeight="700" color="white" lineHeight="1.1">
+        Hey {user.name.split(" ")[0]}! 👋
       </Text>
-      <Text color="gray.400" mt={1} mb={6}>
-        Here's how to get the conversation going.
+      <Text color="gray.400" mt={2} mb={6}>
+        Pick a chat on the left, or start something new.
       </Text>
 
       <Box
@@ -151,26 +132,17 @@ const WelcomePanel = () => {
         gap={4}
         alignItems="start"
       >
-        {/* BABBLE AI */}
-        <Box {...cardProps}>
-          <CardTitle icon="fa-solid fa-robot">Babble AI</CardTitle>
-          <Text color="gray.400" fontSize="sm">
-            Your always-online contact. Ask it anything, or ask how Babble
-            works.
+        <Card color="var(--gradient)" icon="🤖" title="Babble AI">
+          <Text color="gray.300" fontSize="sm">
+            Your always-online buddy. Ask it anything, or ask how Babble works.
           </Text>
-          <Button
-            {...accentButton}
-            disabled={!botChat}
-            onClick={() => setSelectedChat(botChat)}
-          >
-            Say hi
+          <Button {...gradientButton} disabled={!botChat} onClick={() => setSelectedChat(botChat)}>
+            Say hi 👋
           </Button>
-        </Box>
+        </Card>
 
-        {/* INVITE */}
-        <Box {...cardProps}>
-          <CardTitle icon="fa-solid fa-user-plus">Invite a friend</CardTitle>
-          <Text color="gray.400" fontSize="sm">
+        <Card color="linear-gradient(135deg, #f97316, #eab308)" icon="💌" title="Invite a friend">
+          <Text color="gray.300" fontSize="sm">
             Friends who join from your link land straight in a chat with you.
           </Text>
 
@@ -179,38 +151,23 @@ const WelcomePanel = () => {
             value={inviteLink || "Loading your link..."}
             onFocus={(e) => e.target.select()}
             bg="rgba(255,255,255,0.05)"
-            border="1px solid"
-            borderColor="rgba(255,255,255,0.12)"
+            border="1px solid rgba(255,255,255,0.12)"
             color="gray.200"
             fontSize="sm"
-            borderRadius="lg"
+            borderRadius="full"
           />
 
           <Box display="flex" gap={2}>
-            <Button
-              {...accentButton}
-              flex="1"
-              disabled={!inviteLink}
-              onClick={copyLink}
-            >
+            <Button {...gradientButton} flex="1" disabled={!inviteLink} onClick={copyLink}>
               <i className="fa-solid fa-copy" /> Copy
             </Button>
             {navigator.share && (
-              <Button
-                flex="1"
-                variant="outline"
-                color="white"
-                borderColor="rgba(255,255,255,0.2)"
-                disabled={!inviteLink}
-                onClick={shareLink}
-              >
+              <Button {...ghostButton} flex="1" disabled={!inviteLink} onClick={shareLink}>
                 <i className="fa-solid fa-share-nodes" /> Share
               </Button>
             )}
             <Button
-              variant="outline"
-              color="white"
-              borderColor="rgba(255,255,255,0.2)"
+              {...ghostButton}
               disabled={!inviteLink}
               onClick={() => setShowQR((prev) => !prev)}
               aria-label="Show QR code"
@@ -221,60 +178,23 @@ const WelcomePanel = () => {
 
           {showQR && inviteLink && (
             // QR codes need a light background to scan reliably
-            <Box alignSelf="center" bg="white" p={3} borderRadius="12px">
+            <Box alignSelf="center" bg="white" p={3} borderRadius="16px" className="babble-pop">
               <QRCodeSVG value={inviteLink} size={150} />
             </Box>
           )}
-        </Box>
+        </Card>
 
-        {/* COMMUNITY ROOMS */}
-        <Box {...cardProps}>
-          <CardTitle icon="fa-solid fa-people-group">Community rooms</CardTitle>
-          <Text color="gray.400" fontSize="sm">
-            Open rooms where anyone on Babble can talk.
+        <Card color="linear-gradient(135deg, #0ea5e9, #6366f1)" icon="🌍" title="Explore">
+          <Text color="gray.300" fontSize="sm">
+            Rooms for gaming, music, study, food and more, with people from everywhere.
           </Text>
-
-          {roomsLoading ? (
-            <Spinner color="var(--accent-light)" alignSelf="center" />
-          ) : (
-            rooms.map((room) => (
-              <Box
-                key={room._id}
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                gap={2}
-                px={3}
-                py={2}
-                borderRadius="12px"
-                bg="rgba(255,255,255,0.04)"
-              >
-                <Box overflow="hidden">
-                  <Text fontWeight="600" fontSize="sm">
-                    # {room.chatName}
-                  </Text>
-                  <Text fontSize="xs" color="gray.400">
-                    {room.memberCount} member{room.memberCount === 1 ? "" : "s"}
-                  </Text>
-                </Box>
-                <Button
-                  size="xs"
-                  {...(room.joined
-                    ? {
-                        variant: "outline",
-                        color: "white",
-                        borderColor: "rgba(255,255,255,0.2)",
-                      }
-                    : accentButton)}
-                  loading={joiningId === room._id}
-                  onClick={() => openRoom(room)}
-                >
-                  {room.joined ? "Open" : "Join"}
-                </Button>
-              </Box>
-            ))
-          )}
-        </Box>
+          <Button {...gradientButton} onClick={() => setView?.("explore")}>
+            Browse communities
+          </Button>
+          <Button {...ghostButton} loading={rolling} onClick={surpriseMe}>
+            🎲 Surprise me
+          </Button>
+        </Card>
       </Box>
     </Box>
   );

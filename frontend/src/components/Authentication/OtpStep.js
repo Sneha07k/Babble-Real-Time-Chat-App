@@ -51,11 +51,11 @@ const OtpStep = ({ email, onVerify, onResend, onBack, loading }) => {
         onClick={() => onVerify(code.join(""))}
         disabled={!complete}
         loading={loading}
-        bg="var(--accent)"
+        bg="var(--gradient)"
         color="var(--on-accent)"
         fontWeight="bold"
         borderRadius="lg"
-        _hover={{ bg: "var(--accent-strong)" }}
+        _hover={{ bg: "var(--gradient-hover)" }}
       >
         Verify
       </Button>

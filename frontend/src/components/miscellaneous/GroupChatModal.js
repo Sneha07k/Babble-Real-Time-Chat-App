@@ -123,31 +123,8 @@ const GroupChatModal = ({ children }) => {
 
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
-      <Dialog.Trigger asChild>
-        <Button
-          size="sm"
-          bg="gray.700"
-          color="white"
-          borderRadius="999px"
-          px={5}
-          border="1px solid"
-          borderColor="gray.600"
-          fontWeight="600"
-          transition="all 0.2s ease"
-          _hover={{
-            bg: "gray.600",
-            borderColor: "var(--accent)",
-            boxShadow: "0 0 15px color-mix(in srgb, var(--accent) 20%, transparent)",
-            transform: "translateY(-1px)",
-          }}
-        >
-          <i
-            className="fa-solid fa-user-group"
-            style={{ marginRight: "8px" }}
-          />
-          New Group
-        </Button>
-      </Dialog.Trigger>
+      {/* the caller decides what the opening button looks like */}
+      <Dialog.Trigger asChild>{children}</Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop bg="rgba(0,0,0,0.65)" backdropFilter="blur(4px)" />
         <Dialog.Positioner>

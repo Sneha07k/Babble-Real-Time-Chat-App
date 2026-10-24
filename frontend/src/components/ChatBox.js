@@ -2,28 +2,37 @@ import React from "react";
 import { ChatState } from "../Context/ChatProvider";
 import { Box } from "@chakra-ui/react";
 import SingleChat from "./SingleChat";
+import ExplorePage from "./ExplorePage";
 
-const ChatBox = ({ fetchAgain, setFetchAgain }) => {
+const ChatBox = ({ fetchAgain, setFetchAgain, view, setView, hiddenOnMobile }) => {
   const { selectedChat } = ChatState();
+  const showExplore = view === "explore" && !selectedChat;
 
   return (
     <Box
-      display={{ base: selectedChat ? "flex" : "none", md: "flex" }}
+      display={{ base: hiddenOnMobile ? "none" : "flex", md: "flex" }}
       flexDir="column"
-      alignItems="center"
-      p={4}
+      flex="1"
+      minW={0}
+      h="100%"
+      p={showExplore ? 0 : { base: 2, md: 3 }}
       bg="var(--panel)"
-      h="97.5%"
-      w={{ base: "100%", md: "68%" }}
-      borderRadius="18px"
-      border="1px solid"
-      borderColor="color-mix(in srgb, var(--accent) 12%, transparent)"
+      borderRadius={{ base: 0, md: "24px" }}
+      border={{ base: "none", md: "1px solid rgba(255,255,255,0.07)" }}
       color="white"
-      boxShadow="0 8px 32px rgba(0, 0, 0, 0.35)"
-      backdropFilter="blur(10px)"
+      boxShadow="0 12px 40px rgba(0, 0, 0, 0.35)"
+      backdropFilter="blur(14px)"
       overflow="hidden"
     >
-      <SingleChat fetchAgain={fetchAgain} setFetchAgain={setFetchAgain} />
+      {showExplore ? (
+        <ExplorePage setView={setView} />
+      ) : (
+        <SingleChat
+          fetchAgain={fetchAgain}
+          setFetchAgain={setFetchAgain}
+          setView={setView}
+        />
+      )}
     </Box>
   );
 };

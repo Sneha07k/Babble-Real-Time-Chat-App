@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import io from "socket.io-client";
+import { toaster } from "../components/ui/toaster";
+import { THEMES } from "../config/themes";
 
 const ChatContext = createContext();
 
@@ -30,6 +32,12 @@ const ChatProvider = ({ children }) => {
 
   const [socketConnected, setSocketConnected] = useState(false);
 
+  // ids of contacts who have Babble open right now
+  const [onlineUsers, setOnlineUsers] = useState(() => new Set());
+
+  // fresher "last seen" times than the ones loaded with the chat list
+  const [lastSeen, setLastSeen] = useState({});
+
   useEffect(() => {
     if (!user) return;
 
@@ -37,6 +45,27 @@ const ChatProvider = ({ children }) => {
 
     newSocket.on("connected", () => setSocketConnected(true));
     newSocket.on("disconnect", () => setSocketConnected(false));
+
+    newSocket.on("online users", (ids) => setOnlineUsers(new Set(ids)));
+    newSocket.on("presence", ({ userId, online, lastSeen: seen }) => {
+      setOnlineUsers((prev) => {
+        const next = new Set(prev);
+        if (online) next.add(userId);
+        else next.delete(userId);
+        return next;
+      });
+      if (seen) setLastSeen((prev) => ({ ...prev, [userId]: seen }));
+    });
+
+    // someone else in the chat picked a new theme
+    newSocket.on("chat theme", ({ chatId, theme, by }) => {
+      setChats((prev) => prev.map((c) => (c._id === chatId ? { ...c, theme } : c)));
+      setSelectedChat((prev) => (prev?._id === chatId ? { ...prev, theme } : prev));
+      toaster.create({
+        description: `${by} changed the chat theme to ${THEMES[theme]?.name || theme}`,
+        type: "info",
+      });
+    });
     // the server refuses the socket when the saved login is no longer valid
     newSocket.on("connect_error", (error) => {
       if (error.message === "Not authorized") logout();
@@ -57,6 +86,7 @@ const ChatProvider = ({ children }) => {
     setSelectedChat(null);
     setChats([]);
     setNotification([]);
+    setOnlineUsers(new Set());
   }
 
   // an expired or revoked login: sign out instead of failing silently
@@ -89,6 +119,9 @@ const ChatProvider = ({ children }) => {
 
         socket,
         socketConnected,
+
+        onlineUsers,
+        lastSeen,
 
         logout,
       }}

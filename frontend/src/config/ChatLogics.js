@@ -91,3 +91,31 @@ export const formatChatListTime = (date) => {
   if (diff < 7) return new Date(date).toLocaleDateString([], { weekday: "short" });
   return new Date(date).toLocaleDateString([], { day: "numeric", month: "short" });
 };
+
+// "online" is handled by the caller; this covers everyone else
+export const formatLastSeen = (date) => {
+  if (!date) return "offline";
+  const minutes = Math.round((Date.now() - new Date(date)) / 60000);
+  if (minutes < 1) return "last seen just now";
+  if (minutes < 60) return `last seen ${minutes} min ago`;
+  const diff = daysAgo(date);
+  if (diff === 0) return `last seen today at ${formatTime(date)}`;
+  if (diff === 1) return `last seen yesterday at ${formatTime(date)}`;
+  return `last seen ${new Date(date).toLocaleDateString([], { day: "numeric", month: "short" })}`;
+};
+
+// one line describing a message, for chat lists and notifications
+export const messagePreview = (message) => {
+  if (!message) return "";
+  const labels = { image: "📷 Photo", video: "🎥 Video", audio: "🎤 Voice message" };
+  const label = labels[message.attachment?.kind];
+  if (label && message.content) return `${label} · ${message.content}`;
+  return label || message.content || "";
+};
+
+// "1:05" for voice notes and videos
+export const formatDuration = (seconds) => {
+  if (!Number.isFinite(seconds)) return "0:00";
+  const s = Math.round(seconds);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+};

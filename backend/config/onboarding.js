@@ -2,16 +2,18 @@ const crypto = require("crypto");
 const User = require("../models/userModel");
 const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
+const { DEFAULT_COMMUNITIES } = require("./constants");
 
 const BOT_EMAIL = "babble-ai@babble.bot";
 const BOT_PICTURE = "https://api.dicebear.com/9.x/bottts/png?seed=Babble";
-const COMMUNITY_ROOMS = ["General", "Coding Help", "Random"];
+// new users start inside this room; the rest are on the Explore page
+const STARTER_ROOM = "General";
 
 const welcomeText = (name) =>
   `Hi ${name}! 👋 I'm Babble AI, your first contact here. ` +
   `Ask me anything, or ask how Babble works. ` +
-  `You've also been added to the community rooms, and you can invite friends ` +
-  `with your personal link or QR code from the home screen.`;
+  `You're already in the General room. Open Explore to find more communities ` +
+  `or join a random one, and invite friends with your personal link or QR code.`;
 
 const getBotUser = async () => {
   const bot = await User.findOne({ email: BOT_EMAIL });
@@ -30,9 +32,9 @@ const getBotUser = async () => {
 // runs once at server start: makes sure the bot and the rooms exist
 const ensureBabbleSetup = async () => {
   const bot = await getBotUser();
-  for (const chatName of COMMUNITY_ROOMS) {
+  for (const room of DEFAULT_COMMUNITIES) {
     await Chat.updateOne(
-      { isCommunity: true, chatName },
+      { isCommunity: true, chatName: room.chatName },
       {
         $setOnInsert: {
           isGroupChat: true,
@@ -41,6 +43,21 @@ const ensureBabbleSetup = async () => {
         },
       },
       { upsert: true },
+    );
+    // rooms created by older versions have no emoji/description yet
+    await Chat.updateOne(
+      { isCommunity: true, chatName: room.chatName, emoji: { $exists: false } },
+      { $set: { emoji: room.emoji, category: room.category, description: room.description } },
+    );
+  }
+
+  // messages from before read receipts existed count as read by everyone
+  const chatsWithOldMessages = await Message.distinct("chat", { readBy: { $exists: false } });
+  for (const chatId of chatsWithOldMessages) {
+    const chat = await Chat.findById(chatId).select("users");
+    await Message.updateMany(
+      { chat: chatId, readBy: { $exists: false } },
+      { $set: { readBy: chat ? chat.users : [] } },
     );
   }
 };
@@ -52,8 +69,8 @@ const onboardUser = async (user) => {
 
   const bot = await getBotUser();
 
-  await Chat.updateMany(
-    { isCommunity: true },
+  await Chat.updateOne(
+    { isCommunity: true, chatName: STARTER_ROOM },
     { $addToSet: { users: user._id } },
   );
 
@@ -71,6 +88,7 @@ const onboardUser = async (user) => {
       sender: bot._id,
       content: welcomeText(user.name),
       chat: botChat._id,
+      readBy: [bot._id],
     });
     await Chat.findByIdAndUpdate(botChat._id, { latestMessage: welcome._id });
   }

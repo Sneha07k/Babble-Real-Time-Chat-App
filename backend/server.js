@@ -28,6 +28,7 @@ const chatRoutes = require("./routes/chatRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const { ensureBabbleSetup } = require("./config/onboarding");
+const presence = require("./config/presence");
 
 connectDB()
   .then(ensureBabbleSetup)
@@ -92,18 +93,40 @@ io.use(async (socket, next) => {
   try {
     const token = socket.handshake.auth?.token;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("_id");
+    const user = await User.findById(decoded.id).select("_id name");
     if (!user) return next(new Error("Not authorized"));
     socket.userId = user._id.toString();
+    socket.userName = user.name;
     next();
   } catch (error) {
     next(new Error("Not authorized"));
   }
 });
 
-io.on("connection", (socket) => {
+// tell everyone who shares a private chat with this user that they came or went
+const broadcastPresence = async (userId, online, lastSeen) => {
+  const contacts = await presence.contactsOf(userId);
+  contacts.forEach((id) => io.to(id).emit("presence", { userId, online, lastSeen }));
+  return contacts;
+};
+
+io.on("connection", async (socket) => {
   socket.join(socket.userId);
   socket.emit("connected");
+
+  const cameOnline = presence.connect(socket.userId);
+  const contacts = cameOnline
+    ? await broadcastPresence(socket.userId, true)
+    : await presence.contactsOf(socket.userId);
+  // and tell this user which of their contacts are online right now
+  socket.emit("online users", contacts.filter(presence.isOnline));
+
+  socket.on("disconnect", async () => {
+    if (!presence.disconnect(socket.userId)) return;
+    const lastSeen = new Date();
+    await User.updateOne({ _id: socket.userId }, { lastSeen }).catch(() => {});
+    broadcastPresence(socket.userId, false, lastSeen).catch(() => {});
+  });
 
   socket.on("join chat", async (room) => {
     const isMember = await Chat.exists({ _id: room, users: socket.userId }).catch(
@@ -113,7 +136,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("typing", (room) => {
-    if (socket.rooms.has(room)) socket.in(room).emit("typing", room);
+    if (socket.rooms.has(room)) socket.in(room).emit("typing", room, socket.userName);
   });
 
   socket.on("stop typing", (room) => {

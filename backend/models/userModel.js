@@ -17,6 +17,8 @@ const userSchema = mongoose.Schema(
     googleId: { type: String, unique: true, sparse: true },
     // when on, password logins also need a code sent to the user's email
     twoFactorEnabled: { type: Boolean, default: false },
+    // updated when the user's last open tab disconnects
+    lastSeen: { type: Date },
     picture: {
       type: String,
       // required: true,
@@ -49,6 +51,6 @@ userSchema.pre("save", async function () {
 const User = mongoose.model("User", userSchema);
 
 // the only user fields other people are allowed to see
-User.PUBLIC_FIELDS = "name email picture isBot";
+User.PUBLIC_FIELDS = "name email picture isBot lastSeen";
 
 module.exports = User;

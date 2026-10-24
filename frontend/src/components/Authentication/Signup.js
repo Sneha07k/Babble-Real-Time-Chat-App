@@ -320,12 +320,12 @@ const Signup = ({ inviteCode }) => {
         onClick={submitHandler}
         loading={loading}
         disabled={uploading}
-        bg="var(--accent)"
+        bg="var(--gradient)"
         color="var(--on-accent)"
         fontWeight="bold"
         borderRadius="lg"
         _hover={{
-          bg: "var(--accent-strong)",
+          bg: "var(--gradient-hover)",
           transform: "translateY(-1px)",
         }}
         transition="all 0.2s"

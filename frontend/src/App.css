@@ -1,14 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
 .App {
   min-height: 100vh;
   display: flex;
-
-  background: linear-gradient(135deg,
-      var(--bg) 0%,
-      var(--bg-2) 50%,
-      var(--bg-2) 100%);
-
+  background: var(--app-bg);
   color: white;
 }
 
@@ -29,4 +24,28 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* small playful motion; switched off for people who prefer less movement */
+@keyframes babble-pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
+@keyframes babble-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.babble-pop {
+  animation: babble-pop 0.18s ease-out;
+}
+
+.babble-pulse {
+  animation: babble-pulse 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .babble-pop,
+  .babble-pulse {
+    animation: none;
+  }
+}

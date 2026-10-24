@@ -1,27 +1,75 @@
 /*
-  Babble colour palette: change these to re-theme the whole app.
-  --accent is used behind white text, so keep it dark enough to read
+  Babble colour palettes.
+  Each palette only sets the base colours; everything else is derived below.
+  --c1 and --c2 sit behind white text, so keep them dark enough to read
   (about 4.5:1 contrast with white).
+  Per-chat wallpapers live in src/config/themes.js.
 */
+
+/* Ocean Pop (default): blue and teal with a sunny yellow highlight */
 :root {
-  --bg: #0d0e1a;
-  --bg-2: #15162b;
-  --panel: rgba(20, 20, 40, 0.94);
-  --panel-strong: rgba(16, 16, 32, 0.98);
-  --topbar: rgba(17, 17, 34, 0.88);
+  --c1: #0369a1;
+  --c1-strong: #075985;
+  --c2: #0f766e;
+  --c2-strong: #115e59;
+  --highlight: #facc15;
+  --accent-light: #7dd3fc;
+  --bg: #06121c;
+  --bg-2: #0b1d2b;
+  --bubble-theirs: #16303f;
+}
 
-  --accent: #7461f0;
-  --accent-strong: #6450e6;
-  --accent-light: #b3a8ff;
+/* Citrus: warm orange and amber with a lime highlight */
+html[data-palette="citrus"] {
+  --c1: #c2410c;
+  --c1-strong: #9a3412;
+  --c2: #b45309;
+  --c2-strong: #92400e;
+  --highlight: #a3e635;
+  --accent-light: #fdba74;
+  --bg: #140c06;
+  --bg-2: #22150b;
+  --bubble-theirs: #3a2617;
+}
+
+/* Mint & Coral: teal-green with a coral highlight */
+html[data-palette="mint"] {
+  --c1: #0f766e;
+  --c1-strong: #115e59;
+  --c2: #047857;
+  --c2-strong: #065f46;
+  --highlight: #fb7185;
+  --accent-light: #5eead4;
+  --bg: #061411;
+  --bg-2: #0b211c;
+  --bubble-theirs: #163a33;
+}
+
+/* everything below is built from the palette above */
+:root,
+html[data-palette] {
+  --accent: var(--c1);
+  --accent-strong: var(--c1-strong);
   --on-accent: #ffffff;
+  --pink: var(--highlight);
+  --gradient: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
+  --gradient-hover: linear-gradient(135deg, var(--c1-strong) 0%, var(--c2-strong) 100%);
+  --online: #22c55e;
 
-  --chat-bg: #11121f;
-  --bubble-mine: linear-gradient(135deg, #7d6bf3 0%, #6450e6 100%);
-  --bubble-theirs: #23243d;
+  --app-bg:
+    radial-gradient(1100px 600px at 0% 0%, color-mix(in srgb, var(--c1) 30%, transparent), transparent 60%),
+    radial-gradient(900px 520px at 100% 100%, color-mix(in srgb, var(--c2) 24%, transparent), transparent 60%),
+    var(--bg);
+  --panel: color-mix(in srgb, var(--bg-2) 88%, transparent);
+  --panel-strong: color-mix(in srgb, var(--bg-2) 98%, black);
+  --topbar: var(--panel);
 
-  /* Rubik is loaded in App.css; these are Chakra's font settings */
+  --chat-bg: var(--bg);
+  --bubble-mine: var(--gradient);
+
+  /* fonts are loaded in App.css; these are Chakra's font settings */
   --chakra-fonts-body: "Rubik", system-ui, sans-serif;
-  --chakra-fonts-heading: "Rubik", system-ui, sans-serif;
+  --chakra-fonts-heading: "Fredoka", "Rubik", system-ui, sans-serif;
 }
 
 body {
