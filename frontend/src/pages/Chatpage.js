@@ -1,6 +1,7 @@
 // import React, { useEffect, useState } from "react";
 // import axios from "axios";
 import { useState } from "react";
+import { Redirect } from "react-router-dom";
 import { ChatState } from "../Context/ChatProvider";
 import { Box } from "@chakra-ui/react";
 import SideDrawer from "../components/miscellaneous/SideDrawer";
@@ -10,6 +11,9 @@ import ChatBox from "../components/ChatBox";
 const Chatpage = () => {
   const { user } = ChatState();
   const [fetchAgain, setFetchAgain] = useState(false);
+
+  if (!user) return <Redirect to="/" />;
+
   return (
     <div
       style={{

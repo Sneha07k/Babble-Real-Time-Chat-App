@@ -10,6 +10,11 @@ const chatModel = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // public rooms every new user joins automatically
+    isCommunity: {
+      type: Boolean,
+      default: false,
+    },
     users: [
       {
         type: mongoose.Schema.Types.ObjectId,

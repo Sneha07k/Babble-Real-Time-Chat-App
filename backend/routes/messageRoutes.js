@@ -1,19 +1,10 @@
 const express = require('express');
-const { sendMessage } = require('../controllers/messageController');
+const { sendMessage, allMessages } = require('../controllers/messageController');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-const { allMessages } = require("../controllers/messageController");
+const { messageLimiter } = require('../middleware/rateLimiters');
 
-router.route('/').post(protect, sendMessage);
-router.route("/:chatId").get(
-  protect,
-  (req, res, next) => {
-    console.log(" ROUTE HIT:", req.params.chatId);
-    next();
-  },
-  allMessages,
-);
+router.route('/').post(protect, messageLimiter, sendMessage);
+router.route("/:chatId").get(protect, allMessages);
 
 module.exports = router;
-
-

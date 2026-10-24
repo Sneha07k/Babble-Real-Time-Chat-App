@@ -5,14 +5,54 @@ import axios from "axios";
 import { useHistory } from "react-router-dom";
 import { PasswordInput } from "../ui/password-input";
 import { ChatState } from "../../Context/ChatProvider";
+import OtpStep from "./OtpStep";
 
-const Login = () => {
+const Login = ({ inviteCode }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  // set when the account has two-step verification turned on
+  const [otpEmail, setOtpEmail] = useState(null);
 
   const { setUser } = ChatState();
   const history = useHistory();
+
+  const finishLogin = (data) => {
+    toaster.create({
+      description: "Login successful",
+      type: "success",
+      closable: true,
+    });
+
+    localStorage.setItem("userInfo", JSON.stringify(data));
+
+    setEmail("");
+    setPassword("");
+    setOtpEmail(null);
+
+    setUser(data);
+
+    history.push(inviteCode ? `/invite/${inviteCode}` : "/chats");
+  };
+
+  const verifyCode = async (otp) => {
+    try {
+      setLoading(true);
+      const { data } = await axios.post("/api/user/login/verify", {
+        email: otpEmail,
+        otp,
+      });
+      finishLogin(data);
+    } catch (error) {
+      toaster.create({
+        description: error.response?.data?.message || "Verification failed",
+        type: "error",
+        closable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const submitHandler = async () => {
     setLoading(true);
@@ -44,22 +84,19 @@ const Login = () => {
         config,
       );
 
-      toaster.create({
-        description: "Login successful",
-        type: "success",
-        closable: true,
-      });
-
-      localStorage.setItem("userInfo", JSON.stringify(data));
-
-      setEmail("");
-      setPassword("");
-
-      setUser(data);
-
       setLoading(false);
 
-      history.push("/chats");
+      if (data.twoFactorRequired) {
+        setOtpEmail(data.email);
+        toaster.create({
+          description: `We sent a code to ${data.email}`,
+          type: "info",
+          closable: true,
+        });
+        return;
+      }
+
+      finishLogin(data);
     } catch (error) {
       toaster.create({
         description: error.response?.data?.message || "Login failed",
@@ -70,6 +107,19 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  if (otpEmail) {
+    return (
+      <OtpStep
+        email={otpEmail}
+        loading={loading}
+        onVerify={verifyCode}
+        // logging in again re-sends the code (at most once a minute)
+        onResend={submitHandler}
+        onBack={() => setOtpEmail(null)}
+      />
+    );
+  }
 
   return (
     <VStack as="form" autoComplete="off" gap={5} align="stretch" w="100%" p={5}>

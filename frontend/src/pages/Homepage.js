@@ -1,21 +1,35 @@
 import React from "react";
-import { useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useHistory, useLocation } from "react-router-dom";
+import axios from "axios";
 import babbleLogo from "../babble_logo.svg";
-import { Box, Tabs } from "@chakra-ui/react";
+import { Avatar, Box, Tabs, Text } from "@chakra-ui/react";
 import Login from "../components/Authentication/Login";
 import Signup from "../components/Authentication/Signup";
+import GoogleAuthButton from "../components/Authentication/GoogleAuthButton";
 
 const Homepage = () => {
   const history = useHistory();
+  const location = useLocation();
+  // set when someone arrives through a friend's invite link
+  const inviteCode = new URLSearchParams(location.search).get("invite");
+  const [inviter, setInviter] = useState(null);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("userInfo"));
 
     if (user) {
-      history.push("/chats");
+      history.push(inviteCode ? `/invite/${inviteCode}` : "/chats");
     }
-  }, [history]);
+  }, [history, inviteCode]);
+
+  useEffect(() => {
+    if (!inviteCode) return;
+    axios
+      .get(`/api/user/invite/${encodeURIComponent(inviteCode)}`)
+      .then(({ data }) => setInviter(data))
+      .catch(() => setInviter(null));
+  }, [inviteCode]);
 
   return (
     <Box
@@ -35,8 +49,38 @@ const Homepage = () => {
         w="100%"
         mb={12}
       >
-        <img src={babbleLogo} alt="Babble Logo" width="400" />
+        <img
+          src={babbleLogo}
+          alt="Babble Logo"
+          width="400"
+          style={{ maxWidth: "80vw", height: "auto" }}
+        />
       </Box>
+
+      {inviter && (
+        <Box
+          w={{ base: "90%", md: "450px" }}
+          mb={4}
+          px={4}
+          py={3}
+          display="flex"
+          alignItems="center"
+          gap={3}
+          borderRadius="xl"
+          bg="rgba(34,211,238,0.08)"
+          border="1px solid"
+          borderColor="rgba(34,211,238,0.25)"
+        >
+          <Avatar.Root size="sm">
+            <Avatar.Image src={inviter.picture} />
+            <Avatar.Fallback name={inviter.name} />
+          </Avatar.Root>
+          <Text color="gray.200" fontSize="sm">
+            <b>{inviter.name}</b> invited you to Babble. Sign up and you'll
+            be chatting with them straight away.
+          </Text>
+        </Box>
+      )}
 
       {/* Auth Card */}
       <Box
@@ -51,7 +95,7 @@ const Homepage = () => {
           0 0 20px rgba(34,211,238,0.08)
         "
       >
-        <Tabs.Root defaultValue="login" colorScheme="cyan" w="100%" p={2}>
+        <Tabs.Root defaultValue={inviteCode ? "signup" : "login"} colorScheme="cyan" w="100%" p={2}>
           <Tabs.List
             borderColor="rgba(255,255,255,0.08)"
             bg="rgba(255,255,255,0.02)"
@@ -95,13 +139,15 @@ const Homepage = () => {
           </Tabs.List>
 
           <Tabs.Content value="login">
-            <Login />
+            <Login inviteCode={inviteCode} />
           </Tabs.Content>
 
           <Tabs.Content value="signup">
-            <Signup />
+            <Signup inviteCode={inviteCode} />
           </Tabs.Content>
         </Tabs.Root>
+
+        <GoogleAuthButton inviteCode={inviteCode} />
       </Box>
     </Box>
   );

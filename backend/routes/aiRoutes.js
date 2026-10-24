@@ -1,21 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const Groq = require("groq-sdk");
+const { getGroq, AI_MODEL } = require("../config/groq");
+const { protect } = require("../middleware/authMiddleware");
+const { aiLimiter } = require("../middleware/rateLimiters");
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
-router.post("/replies", async (req, res) => {
+router.post("/replies", protect, aiLimiter, async (req, res) => {
   try {
     const { message } = req.body;
 
-    if (!message) {
+    if (!message || typeof message !== "string") {
       return res.status(400).json({ error: "Message required" });
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "openai/gpt-oss-20b",
+    const completion = await getGroq().chat.completions.create({
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
@@ -24,7 +22,7 @@ router.post("/replies", async (req, res) => {
         },
         {
           role: "user",
-          content: message,
+          content: message.slice(-2000),
         },
       ],
     });
@@ -38,7 +36,11 @@ router.post("/replies", async (req, res) => {
     let replies;
 
     if (match) {
-      replies = JSON.parse(match[0]);
+      try {
+        replies = JSON.parse(match[0]);
+      } catch (parseError) {
+        replies = ["ok", "sounds good", "got it"];
+      }
     } else {
       replies = ["ok", "sounds good", "got it"];
     }
@@ -46,26 +48,30 @@ router.post("/replies", async (req, res) => {
     res.json(replies);
   } catch (err) {
     console.log("AI ERROR:", err);
-    res.status(500).json({ error: "Groq failed" });
+    res
+      .status(err.status || 500)
+      .json({ error: err.status ? err.message : "Groq failed" });
   }
 });
 
 
 
-router.post("/summarize", async (req, res) => {
+router.post("/summarize", protect, aiLimiter, async (req, res) => {
   try {
     const { messages } = req.body;
 
-    if (!messages || !messages.length) {
+    if (!Array.isArray(messages) || !messages.length) {
       return res.status(400).json({ error: "Messages required" });
     }
 
+    // keep the prompt bounded: most recent 200 messages only
     const chatText = messages
+      .slice(-200)
       .map((m) => `${m.sender}: ${m.content}`)
       .join("\n");
 
-    const completion = await groq.chat.completions.create({
-      model: "openai/gpt-oss-20b",
+    const completion = await getGroq().chat.completions.create({
+      model: AI_MODEL,
       messages: [
         {
           role: "system",
@@ -93,12 +99,20 @@ Return JSON only:
 
     text = text.replace(/```json|```/g, "").trim();
 
-    const data = JSON.parse(text);
+    const match = text.match(/\{.*\}/s);
+    let data;
+    try {
+      data = JSON.parse(match ? match[0] : text);
+    } catch (parseError) {
+      data = { summary: text, decisions: [], tasks: [], events: [] };
+    }
 
     res.json(data);
   } catch (err) {
     console.log("SUMMARY ERROR:", err);
-    res.status(500).json({ error: "Groq failed" });
+    res
+      .status(err.status || 500)
+      .json({ error: err.status ? err.message : "Groq failed" });
   }
 });
 

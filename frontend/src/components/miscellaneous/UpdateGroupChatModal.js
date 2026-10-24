@@ -17,10 +17,12 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
   const [loading, setLoading] = useState(false);
   const { selectedChat, user, setSelectedChat } = ChatState();
   const [renameLoading, setRenameLoading] = useState(false);
+  // groupAdmin is a full user object or, for chats that arrived live, just an id
+  const adminId = selectedChat.groupAdmin?._id || selectedChat.groupAdmin;
 
 
   const handleRemove = async (user1) => { 
-    if (selectedChat.groupAdmin._id !== user._id && user1._id !== user._id) {
+    if (adminId !== user._id && user1._id !== user._id) {
       toaster.create({
         title: "Only admins can remove someone",
         type: "info"
@@ -49,7 +51,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
       setLoading(false);
     } catch (error) {
       toaster.create({
-        title: "Error removing member",
+        title: error.response?.data?.message || "Error removing member",
         type: "error"
       });
     setLoading(false);
@@ -67,7 +69,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
       });
       return;
     }
-    if (selectedChat.groupAdmin._id !== user._id) {
+    if (adminId !== user._id) {
       toaster.create({
         title: "Only the admin can add new members",
         type: "info"
@@ -91,7 +93,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
       
     } catch (error) {
       toaster.create({
-        title: "Error adding member",
+        title: error.response?.data?.message || "Error adding member",
         type:"error"
       })
       setLoading(false);
@@ -120,7 +122,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
       setRenameLoading(false);
     } catch (error) {
       toaster.create({
-        title: "Error renaming group",
+        title: error.response?.data?.message || "Error renaming group",
         type: "error",
       });
       setRenameLoading(false);
@@ -140,13 +142,16 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
-      console.log(data);
+      const { data } = await axios.get(
+        `/api/user?search=${encodeURIComponent(query)}`,
+        config,
+      );
       // console.log();
 
       setLoading(false);
       setSearchResult(data);
     } catch (error) {
+      setLoading(false);
       toaster.create({
         title: "Error Occured!",
         description: "Failed to load the search results",
@@ -158,7 +163,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
     <Dialog.Root>
       <Dialog.Trigger asChild>
         <Text cursor="pointer" color="blue.300" fontSize={"25px"}>
-          <i class="fa-solid fa-users"></i>
+          <i className="fa-solid fa-users"></i>
         </Text>
       </Dialog.Trigger>
       <Portal>
@@ -200,7 +205,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
                   colorScheme={"teal"}
                   backgroundColor={"teal.500"}
                   ml={1}
-                  isLoading={renameLoading}
+                  loading={renameLoading}
                   onClick={handleRename}
                   // mr={4}
                 >

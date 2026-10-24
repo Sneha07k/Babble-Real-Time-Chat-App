@@ -20,5 +20,16 @@ const messageModel = mongoose.Schema(
   },
 );
 
+// the shape the frontend expects: sender + chat with its members
+messageModel.methods.populateForClient = function () {
+  return this.populate([
+    { path: "sender", select: "name picture isBot" },
+    {
+      path: "chat",
+      populate: { path: "users", select: "name picture email isBot" },
+    },
+  ]);
+};
+
 const Message = mongoose.model("Message", messageModel);
 module.exports = Message;

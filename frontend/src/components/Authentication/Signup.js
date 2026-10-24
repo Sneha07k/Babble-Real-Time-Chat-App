@@ -4,8 +4,13 @@ import { PasswordInput } from "../ui/password-input";
 import { toaster } from "../ui/toaster";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import { ChatState } from "../../Context/ChatProvider";
+import OtpStep from "./OtpStep";
 
-const Signup = () => {
+const Signup = ({ inviteCode }) => {
+  const { setUser } = ChatState();
+  // "details" (the form) -> "verify" (enter the emailed code)
+  const [step, setStep] = useState("details");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -92,14 +97,52 @@ const Signup = () => {
       return;
     }
 
+    if (password.length < 8) {
+      toaster.create({
+        description: "Password must be at least 8 characters",
+        type: "warning",
+        closable: true,
+      });
+
+      setLoading(false);
+      return;
+    }
+
+    await sendCode();
+  };
+
+  // step 1: email a verification code
+  const sendCode = async () => {
+    try {
+      setLoading(true);
+      await axios.post("/api/user/otp/signup", { email });
+      setStep("verify");
+      toaster.create({
+        description: `We sent a code to ${email}`,
+        type: "success",
+        closable: true,
+      });
+    } catch (error) {
+      toaster.create({
+        description: error.response?.data?.message || "Couldn't send the code",
+        type: "error",
+        closable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // step 2: create the account with the code
+  const verifyAndRegister = async (otp) => {
+    setLoading(true);
+
     try {
       const config = {
         headers: {
           "Content-type": "application/json",
         },
       };
-
-      console.log("profilePicture =", profilePicture);
 
       const { data } = await axios.post(
         "/api/user",
@@ -108,6 +151,7 @@ const Signup = () => {
           email,
           password,
           picture: profilePicture,
+          otp,
         },
         config,
       );
@@ -120,12 +164,14 @@ const Signup = () => {
 
       localStorage.setItem("userInfo", JSON.stringify(data));
 
+      setUser(data);
+
       setLoading(false);
 
-      history.push("/chats");
+      history.push(inviteCode ? `/invite/${inviteCode}` : "/chats");
     } catch (error) {
       toaster.create({
-        description: "Registration failed",
+        description: error.response?.data?.message || "Registration failed",
         type: "error",
         closable: true,
       });
@@ -133,6 +179,18 @@ const Signup = () => {
       setLoading(false);
     }
   };
+
+  if (step === "verify") {
+    return (
+      <OtpStep
+        email={email}
+        loading={loading}
+        onVerify={verifyAndRegister}
+        onResend={sendCode}
+        onBack={() => setStep("details")}
+      />
+    );
+  }
 
   return (
     <VStack gap={5} align="stretch" w="100%" p={5}>

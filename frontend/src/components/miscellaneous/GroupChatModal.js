@@ -21,6 +21,7 @@ const GroupChatModal = ({ children }) => {
   const [search, setSearch] = useState();
   const [searchResult, setSearchResult] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const { user, chats, setChats } = ChatState();
 
@@ -37,13 +38,16 @@ const GroupChatModal = ({ children }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
-      console.log(data);
+      const { data } = await axios.get(
+        `/api/user?search=${encodeURIComponent(query)}`,
+        config,
+      );
       // console.log();
 
       setLoading(false);
       setSearchResult(data);
     } catch (error) {
+      setLoading(false);
       toaster.create({
         title: "Error Occured!",
         description: "Failed to load the search results",
@@ -52,13 +56,27 @@ const GroupChatModal = ({ children }) => {
     }
   };
 
-  const handleSubmit = async () => { 
-      
-    if (!groupChatName || !selectedUsers) {
+  const resetForm = () => {
+    setGroupChatName("");
+    setSelectedUsers([]);
+    setSearch("");
+    setSearchResult([]);
+  };
+
+  const handleSubmit = async () => {
+
+    if (!groupChatName?.trim()) {
       toaster.create({
-        title: "Please fill all the fields first",
+        title: "Please enter a group name",
         type: "error"
-      })  
+      })
+      return;
+    }
+    if (selectedUsers.length < 2) {
+      toaster.create({
+        title: "Add at least 2 people to make a group",
+        type: "error"
+      })
       return;
     }
     try {
@@ -77,9 +95,11 @@ const GroupChatModal = ({ children }) => {
         title: "New group chat created",
         type:"success"
       })
+      resetForm();
+      setOpen(false);
     } catch (error) {
        toaster.create({
-         title: "Failed to create the group chat",
+         title: error.response?.data?.message || "Failed to create the group chat",
          type: "error"
        });
     }
@@ -89,7 +109,8 @@ const GroupChatModal = ({ children }) => {
   };
     
     const handleGroup = (userToAdd) => {
-        if (selectedUsers.includes(userToAdd)) {
+        // compare ids: each search returns fresh objects for the same people
+        if (selectedUsers.some((u) => u._id === userToAdd._id)) {
             toaster.create({
                 title: "User already added",
                 type:"info"
@@ -101,7 +122,7 @@ const GroupChatModal = ({ children }) => {
     };
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Dialog.Trigger asChild>
         <Button
           size="sm"
@@ -155,6 +176,7 @@ const GroupChatModal = ({ children }) => {
                 <Input
                   placeholder="Group Name"
                   mb={3}
+                  value={groupChatName || ""}
                   onChange={(e) => setGroupChatName(e.target.value)}
                 />
               </Field.Root>
@@ -164,6 +186,7 @@ const GroupChatModal = ({ children }) => {
                 <Input
                   placeholder="User name"
                   mb={1}
+                  value={search || ""}
                   onChange={(e) => handleSearch(e.target.value)}
                 />
                 <Box w="100%" display={"flex"} flexWrap={"wrap"} pb={3}>

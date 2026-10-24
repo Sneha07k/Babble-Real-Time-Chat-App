@@ -5,17 +5,27 @@ import App from "./App";
 import { Provider } from "./components/ui/provider";
 import { BrowserRouter } from "react-router-dom";
 import ChatProvider from "./Context/ChatProvider";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { GOOGLE_CLIENT_ID } from "./components/Authentication/GoogleAuthButton";
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(
+const app = (
   <BrowserRouter>
     <ChatProvider>
       <Provider>
         <App />
       </Provider>
     </ChatProvider>
-  </BrowserRouter>,
-  document.getElementById("root"),
+  </BrowserRouter>
+);
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+// without a client id the Google button is hidden, so skip loading Google's script
+root.render(
+  GOOGLE_CLIENT_ID ? (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>{app}</GoogleOAuthProvider>
+  ) : (
+    app
+  ),
 );
 
 

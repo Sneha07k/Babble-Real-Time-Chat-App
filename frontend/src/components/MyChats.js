@@ -8,12 +8,35 @@ import { Text } from "@chakra-ui/react";
 import { getSender } from "../config/ChatLogics";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
 import { Avatar } from "@chakra-ui/react";
+import WelcomePanel from "./WelcomePanel";
+
+const ChatTag = ({ children }) => (
+  <Text
+    as="span"
+    ml={2}
+    px={2}
+    py="1px"
+    borderRadius="full"
+    fontSize="10px"
+    fontWeight="700"
+    letterSpacing="0.5px"
+    textTransform="uppercase"
+    bg="rgba(34,211,238,0.15)"
+    color="#67E8F9"
+    verticalAlign="middle"
+  >
+    {children}
+  </Text>
+);
 
 const MyChats = ({ fetchAgain }) => {
   const [loggedUser, setLoggedUser] = useState();
   const [loading, setLoading] = useState(false);
+  // phones only: the right-hand welcome panel is hidden there
+  const [showWelcome, setShowWelcome] = useState(false);
 
-  const { selectedChat, setSelectedChat, user, chats, setChats } = ChatState();
+  const { selectedChat, setSelectedChat, user, chats, setChats, socket } =
+    ChatState();
 
  const fetchChats = async () => {
    try {
@@ -45,6 +68,29 @@ const MyChats = ({ fetchAgain }) => {
       fetchChats();
     }
   }, [user, fetchAgain]);
+
+  useEffect(() => {
+    setShowWelcome(false);
+  }, [selectedChat]);
+
+  // a friend signed up with our invite link: their chat appears right away
+  useEffect(() => {
+    if (!socket) return;
+
+    const onNewChat = (chat) => {
+      setChats((prev) =>
+        prev.some((c) => c._id === chat._id) ? prev : [chat, ...prev],
+      );
+      const friend = chat.users.find((u) => u._id !== user._id);
+      toaster.create({
+        description: `${friend?.name || "Someone"} joined from your invite`,
+        type: "success",
+      });
+    };
+
+    socket.on("new chat", onNewChat);
+    return () => socket.off("new chat", onNewChat);
+  }, [socket, user, setChats]);
 
   if (!user || !loggedUser) {
     return null;
@@ -80,23 +126,37 @@ const MyChats = ({ fetchAgain }) => {
           My Chats
         </Box>
 
-        <GroupChatModal>
+        <Box display="flex" alignItems="center" gap={2}>
           <Button
+            display={{ base: "flex", md: "none" }}
             size="sm"
-            bg="white"
-            color="gray.800"
             borderRadius="12px"
-            fontWeight="600"
-            px={4}
-            _hover={{
-              bg: "gray.100",
-              transform: "translateY(-1px)",
-            }}
+            bg={showWelcome ? "#22D3EE" : "rgba(255,255,255,0.08)"}
+            color={showWelcome ? "#0B0D12" : "white"}
+            onClick={() => setShowWelcome((prev) => !prev)}
+            aria-label="Get started"
           >
-            New Group Chat
-            <i className="fa-solid fa-plus" style={{ marginLeft: "8px" }}></i>
+            <i className="fa-solid fa-compass"></i>
           </Button>
-        </GroupChatModal>
+
+          <GroupChatModal>
+            <Button
+              size="sm"
+              bg="white"
+              color="gray.800"
+              borderRadius="12px"
+              fontWeight="600"
+              px={4}
+              _hover={{
+                bg: "gray.100",
+                transform: "translateY(-1px)",
+              }}
+            >
+              New Group Chat
+              <i className="fa-solid fa-plus" style={{ marginLeft: "8px" }}></i>
+            </Button>
+          </GroupChatModal>
+        </Box>
       </Box>
 
       <Box
@@ -109,7 +169,9 @@ const MyChats = ({ fetchAgain }) => {
         borderRadius="18px"
         overflow="hidden"
       >
-        {loading ? (
+        {showWelcome ? (
+          <WelcomePanel />
+        ) : loading ? (
           <Box
             display="flex"
             justifyContent="center"
@@ -188,6 +250,9 @@ const MyChats = ({ fetchAgain }) => {
                       {!chat.isGroupChat
                         ? getSender(loggedUser, chat.users)
                         : chat.chatName}
+                      {!chat.isGroupChat &&
+                        chat.users.some((u) => u.isBot) && <ChatTag>AI</ChatTag>}
+                      {chat.isCommunity && <ChatTag>Community</ChatTag>}
                     </Text>
 
                     <Text

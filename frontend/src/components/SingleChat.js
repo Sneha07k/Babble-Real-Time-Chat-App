@@ -5,23 +5,42 @@ import { getSender } from "../config/ChatLogics";
 import axios from "axios";
 import "./styles.css";
 import ScorllableChat from "../components/ScorllableChat";
-import io from "socket.io-client";
 import Lottie from "react-lottie";
 import animationData from "../animation/Pudgy work.json";
 import EmojiPicker from "emoji-picker-react";
 import ProfileModal from "../components/miscellaneous/ProfileModal";
 import UpdateGroupChatModal from "../components/miscellaneous/UpdateGroupChatModal";
 import CatchUpSidebar from "../components/miscellaneous/CatchUpSidebar";
+import WelcomePanel from "./WelcomePanel";
+import { toaster } from "./ui/toaster";
+
+// rate-limit and "AI not configured" errors carry a readable reason
+const showAiError = (error, fallback) =>
+  toaster.create({
+    description:
+      error.response?.data?.message || error.response?.data?.error || fallback,
+    type: "error",
+  });
 
 
 
-const ENDPOINT = "https://babble-cf3w.onrender.com";
-let socket;
+const TYPING_TIMEOUT = 3000;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
-  const { user, selectedChat, setNotification, setChats, setSelectedChat } = ChatState();
+  const {
+    user,
+    selectedChat,
+    setNotification,
+    setChats,
+    setSelectedChat,
+    socket,
+    socketConnected,
+  } = ChatState();
 
   const selectedChatCompare = useRef();
+  // refs, not state: the typing timer must see the latest values
+  const typingRef = useRef(false);
+  const typingTimerRef = useRef();
   const suggestionRef = useRef();
   const aiContainerRef = useRef();
   const emojiPickerRef = useRef();
@@ -30,8 +49,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
-  const [socketConnected, setSocketConnected] = useState(false);
-  const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [open, setOpen] = useState(false);
@@ -57,16 +74,24 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
 
   useEffect(() => {
-    socket = io(ENDPOINT);
+    if (!socket) return;
 
-    socket.emit("setup", user);
+    // only show the indicator for the chat that is actually open
+    const onTyping = (room) => {
+      if (room === selectedChatCompare.current?._id) setIsTyping(true);
+    };
+    const onStopTyping = (room) => {
+      if (room === selectedChatCompare.current?._id) setIsTyping(false);
+    };
 
-    socket.on("connected", () => setSocketConnected(true));
-    socket.on("typing", () => setIsTyping(true));
-    socket.on("stop typing", () => setIsTyping(false));
+    socket.on("typing", onTyping);
+    socket.on("stop typing", onStopTyping);
 
-    return () => socket.disconnect();
-  }, [user]);
+    return () => {
+      socket.off("typing", onTyping);
+      socket.off("stop typing", onStopTyping);
+    };
+  }, [socket]);
 
 
   useEffect(() => {
@@ -90,28 +115,34 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
       setMessages(data);
       setLoading(false);
-
-      // socket.emit("join chat", selectedChat._id);
     } catch (err) {
-      console.log(err);
+      toaster.create({ description: "Failed to load messages", type: "error" });
       setLoading(false);
     }
   };
 
+  // re-join after a reconnect too, since the server forgets rooms on disconnect
   useEffect(() => {
-    if (selectedChat?._id) {
+    if (socket && socketConnected && selectedChat?._id) {
       socket.emit("join chat", selectedChat._id);
     }
-  }, [selectedChat]);
+  }, [selectedChat, socket, socketConnected]);
 
-  
   useEffect(() => {
     selectedChatCompare.current = selectedChat;
+    setIsTyping(false);
     fetchMessages();
-
   }, [selectedChat]);
 
   const fetchAISuggestions = async () => {
+    if (!messages.length) {
+      toaster.create({
+        description: "Send a message first, then Ask AI for replies",
+        type: "info",
+      });
+      return;
+    }
+
     try {
       setAiLoading(true);
 
@@ -120,13 +151,15 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         .map((m) => m.content)
         .join("\n");
 
-      const res = await axios.post("/api/ai/replies", {
-        message: context,
-      });
+      const res = await axios.post(
+        "/api/ai/replies",
+        { message: context },
+        { headers: { Authorization: `Bearer ${user.token}` } },
+      );
 
       setAiSuggestion(res.data || []);
     } catch (err) {
-      console.log(err);
+      showAiError(err, "Couldn't get suggestions");
       setAiSuggestion([]);
     } finally {
       setAiLoading(false);
@@ -134,6 +167,15 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   };
 
   const handleCatchUp = async () => {
+    if (loadingSummary) return;
+    if (!messages.length) {
+      toaster.create({
+        description: "Nothing to summarize yet",
+        type: "info",
+      });
+      return;
+    }
+
     try {
       setLoadingSummary(true);
 
@@ -141,7 +183,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         "/api/ai/summarize",
         {
           messages: messages.map((m) => ({
-            sender: m.sender.name,
+            sender: m.sender?.name || "Unknown",
             content: m.content,
           })),
         },
@@ -155,7 +197,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       setSummary(data);
       setShowSummary(true);
     } catch (error) {
-      console.log(error);
+      showAiError(error, "Couldn't summarize this chat");
     } finally {
       setLoadingSummary(false);
     }
@@ -218,8 +260,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
 
   const sendMessage = async (event) => {
-    if (event.key === "Enter" && newMessage) {
-      socket.emit("stop typing", selectedChat._id);
+    if (event.key === "Enter" && newMessage.trim()) {
+      clearTimeout(typingTimerRef.current);
+      typingRef.current = false;
+      socket?.emit("stop typing", selectedChat._id);
 
       try {
         const config = {
@@ -243,8 +287,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         setActiveSuggestion(-1);
         setShowEmojiPicker(false);
 
-        socket.emit("new message", data);
-
+        // the server delivers the message to the other members after saving it
         setMessages((prev) => [...prev, data]);
 
         setChats((prevChats) =>
@@ -255,7 +298,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           ),
         );
       } catch (error) {
-        console.log(error);
+        toaster.create({
+          description:
+            error.response?.data?.message || "Message could not be sent",
+          type: "error",
+        });
       }
     }
   };
@@ -298,22 +345,19 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     if (!socketConnected) return;
 
-    if (!typing) {
-      setTyping(true);
-      socket.emit("typing", selectedChat._id);
+    const room = selectedChat._id;
+
+    if (!typingRef.current) {
+      typingRef.current = true;
+      socket.emit("typing", room);
     }
 
-    let lastTypingTime = new Date().getTime();
-
-    setTimeout(() => {
-      let timeNow = new Date().getTime();
-      let timeDifference = timeNow - lastTypingTime;
-
-      if (timeDifference >= 3000 && typing) {
-        socket.emit("stop typing", selectedChat._id);
-        setTyping(false);
-      }
-    }, 3000);
+    // restart the countdown on every keystroke; stop after 3s of silence
+    clearTimeout(typingTimerRef.current);
+    typingTimerRef.current = setTimeout(() => {
+      typingRef.current = false;
+      socket.emit("stop typing", room);
+    }, TYPING_TIMEOUT);
   };
 
   useEffect(() => {
@@ -344,7 +388,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           (chat) => chat._id === incomingChatId,
         );
 
-        if (chatIndex === -1) return prevChats;
+        // someone started a brand-new chat with us: show it at the top
+        if (chatIndex === -1) {
+          return [
+            { ...newMessageReceived.chat, latestMessage: newMessageReceived },
+            ...prevChats,
+          ];
+        }
 
         const updatedChat = {
           ...prevChats[chatIndex],
@@ -360,12 +410,14 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       });
     };
 
+    if (!socket) return;
+
     socket.on("message received", handleMessageReceived);
 
     return () => {
       socket.off("message received", handleMessageReceived);
     };
-  }, []);
+  }, [socket]);
 
 
   return (
@@ -653,17 +705,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           </Box>
         </>
       ) : (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="100%"
-          width="100%"
-        >
-          <Text fontSize="2xl" fontWeight="600" color="gray.400">
-            Select a chat to start texting
-          </Text>
-        </Box>
+        <WelcomePanel />
       )}
       <CatchUpSidebar
         isOpen={showSummary}

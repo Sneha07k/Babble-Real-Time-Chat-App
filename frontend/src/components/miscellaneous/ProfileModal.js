@@ -1,8 +1,43 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import { Dialog, Portal, CloseButton, VStack } from "@chakra-ui/react";
-import { Image, Text } from "@chakra-ui/react";
+import { Box, Image, Switch, Text } from "@chakra-ui/react";
+import { ChatState } from "../../Context/ChatProvider";
+import { toaster } from "../ui/toaster";
 
 const ProfileModal = ({ user, open, setOpen }) => {
+  const { user: loggedUser, setUser } = ChatState();
+  const [saving, setSaving] = useState(false);
+
+  const isOwnProfile = user?._id === loggedUser?._id;
+
+  const toggleTwoFactor = async (enabled) => {
+    try {
+      setSaving(true);
+      const { data } = await axios.put(
+        "/api/user/2fa",
+        { enabled },
+        { headers: { Authorization: `Bearer ${loggedUser.token}` } },
+      );
+      const updated = { ...loggedUser, twoFactorEnabled: data.twoFactorEnabled };
+      localStorage.setItem("userInfo", JSON.stringify(updated));
+      setUser(updated);
+      toaster.create({
+        description: data.twoFactorEnabled
+          ? "Two-step verification is on"
+          : "Two-step verification is off",
+        type: "success",
+      });
+    } catch (error) {
+      toaster.create({
+        description: error.response?.data?.message || "Couldn't update setting",
+        type: "error",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
       <Portal>
@@ -52,6 +87,39 @@ const ProfileModal = ({ user, open, setOpen }) => {
                 <Text fontSize="lg" color="gray.300" textAlign="center">
                   {user?.email}
                 </Text>
+
+                {isOwnProfile && loggedUser.hasPassword !== false && (
+                  <Box
+                    w="100%"
+                    p={4}
+                    borderRadius="14px"
+                    bg="rgba(255,255,255,0.04)"
+                    border="1px solid"
+                    borderColor="rgba(255,255,255,0.08)"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap={4}
+                  >
+                    <Box>
+                      <Text fontWeight="600">Two-step verification</Text>
+                      <Text fontSize="xs" color="gray.400">
+                        Ask for a code from your email when logging in
+                      </Text>
+                    </Box>
+                    <Switch.Root
+                      colorPalette="cyan"
+                      checked={Boolean(loggedUser.twoFactorEnabled)}
+                      disabled={saving}
+                      onCheckedChange={(e) => toggleTwoFactor(e.checked)}
+                    >
+                      <Switch.HiddenInput />
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                    </Switch.Root>
+                  </Box>
+                )}
               </VStack>
             </Dialog.Body>
 

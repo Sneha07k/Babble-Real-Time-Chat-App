@@ -40,12 +40,13 @@ const SideDrawer = () => {
     setChats,
     notification,
     setNotification,
+    logout,
   } = ChatState();
 
   const history = useHistory();
 
   const logoutHandler = () => {
-    localStorage.removeItem("userInfo");
+    logout();
     history.push("/");
   };
 
@@ -69,7 +70,10 @@ const SideDrawer = () => {
         },
       };
 
-      const { data } = await axios.get(`/api/user?search=${search}`, config);
+      const { data } = await axios.get(
+        `/api/user?search=${encodeURIComponent(search)}`,
+        config,
+      );
 
       setSearchResult(data);
     } catch (error) {

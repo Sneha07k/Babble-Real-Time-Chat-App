@@ -1,14 +1,24 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 import io from "socket.io-client";
 
 const ChatContext = createContext();
 
-const ENDPOINT = "http://localhost:5000";
+// same origin in both development (Vite proxies /socket.io) and production;
+// set VITE_SOCKET_URL only if the backend lives on a different domain
+const ENDPOINT = import.meta.env.VITE_SOCKET_URL || undefined;
 
-let socket;
+const readStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("userInfo"));
+  } catch (error) {
+    return null;
+  }
+};
 
 const ChatProvider = ({ children }) => {
-  const [user, setUser] = useState();
+  // read synchronously so pages know on the first render whether someone is logged in
+  const [user, setUser] = useState(readStoredUser);
 
   const [selectedChat, setSelectedChat] = useState();
 
@@ -16,30 +26,51 @@ const ChatProvider = ({ children }) => {
 
   const [notification, setNotification] = useState([]);
 
-  useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+  const [socket, setSocket] = useState(null);
 
-    setUser(userInfo);
-  }, []);
+  const [socketConnected, setSocketConnected] = useState(false);
 
   useEffect(() => {
     if (!user) return;
 
-    socket = io(ENDPOINT);
+    const newSocket = io(ENDPOINT, { auth: { token: user.token } });
 
-    console.log("Socket connecting...");
-
-    socket.emit("setup", user);
-
-    socket.on("connected", () => {
-      console.log("Socket connected", socket.id);
+    newSocket.on("connected", () => setSocketConnected(true));
+    newSocket.on("disconnect", () => setSocketConnected(false));
+    // the server refuses the socket when the saved login is no longer valid
+    newSocket.on("connect_error", (error) => {
+      if (error.message === "Not authorized") logout();
     });
 
+    setSocket(newSocket);
 
     return () => {
-      socket.disconnect();
+      newSocket.disconnect();
+      setSocket(null);
+      setSocketConnected(false);
     };
   }, [user]);
+
+  function logout() {
+    localStorage.removeItem("userInfo");
+    setUser(null);
+    setSelectedChat(null);
+    setChats([]);
+    setNotification([]);
+  }
+
+  // an expired or revoked login: sign out instead of failing silently
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        const sentToken = error.config?.headers?.Authorization;
+        if (error.response?.status === 401 && sentToken) logout();
+        return Promise.reject(error);
+      },
+    );
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
 
   return (
     <ChatContext.Provider
@@ -55,6 +86,11 @@ const ChatProvider = ({ children }) => {
 
         notification,
         setNotification,
+
+        socket,
+        socketConnected,
+
+        logout,
       }}
     >
       {children}

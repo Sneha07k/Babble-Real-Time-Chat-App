@@ -8,25 +8,24 @@
   "main": "server.js",
   "scripts": {
     "start": "node backend/server.js",
-     "server": "nodemon backend/server.js",
-     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
+    "server": "nodemon backend/server.js",
+    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "dependencies": {
-    "@chakra-ui/react": "^3.35.0",
-    "@emotion/react": "^11.14.0",
-    "@google/generative-ai": "^0.24.1",
-    "axios": "^1.18.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^7.5.0",
+    "google-auth-library": "^11.3.1",
     "groq-sdk": "^1.2.1",
+    "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.3",
-    "mogoose": "^0.0.1-security",
-    "mongodb": "^7.2.0",
     "mongoose": "^9.6.3",
-    "nodemon": "^3.1.14",
-    "openai": "^6.44.0",
+    "nodemailer": "^10.2.1",
     "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
