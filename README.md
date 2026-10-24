@@ -117,11 +117,6 @@ flowchart LR
 
 ## Getting Started Locally
 
-### Prerequisites
-- Node.js 20 or newer
-- A MongoDB connection string (local or MongoDB Atlas)
-- A Groq API key (free at [console.groq.com](https://console.groq.com))
-
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/Sneha07k/Babble-Real-Time-Chat-App.git
@@ -134,7 +129,6 @@ Copy the example files in the root and frontend folders:
 cp .env.example .env
 cp frontend/.env.example frontend/.env
 ```
-Fill in `.env` with your MongoDB URI, JWT secret and Groq API key. Google sign-in and SMTP email are optional in development; without SMTP, sign-up codes are printed in the backend terminal. Never commit `.env` files.
 
 ### 3. Install dependencies
 ```bash
@@ -168,6 +162,3 @@ npm start       # one server for the API, the live socket and the website
 ```
 
 ---
-
-## License
-This project is open-source and available under the [MIT License](LICENSE).
