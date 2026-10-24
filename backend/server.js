@@ -64,8 +64,15 @@ app.use("/api/ai", aiRoutes);
 
 // deployment code
 const __dirname1 = path.resolve();
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname1, "frontend", "build")));
+const buildDir = path.join(__dirname1, "frontend", "build");
+// serve the website whenever it has been built, so a mis-set NODE_ENV on the
+// host can't leave visitors looking at "API is running"
+const serveFrontend =
+  process.env.NODE_ENV === "production" ||
+  require("fs").existsSync(path.join(buildDir, "index.html"));
+console.log(serveFrontend ? "Serving the website from frontend/build" : "Frontend not built: API only");
+if (serveFrontend) {
+  app.use(express.static(buildDir));
   app.use((req, res, next) => {
     // unknown /api routes should still 404 as JSON, not return the React app
     if (req.originalUrl.startsWith("/api")) return next();
