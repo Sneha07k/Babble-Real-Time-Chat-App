@@ -144,8 +144,8 @@ const Login = ({ inviteCode }) => {
             color: "gray.500",
           }}
           _focus={{
-            borderColor: "#22D3EE",
-            boxShadow: "0 0 0 1px #22D3EE",
+            borderColor: "var(--accent-light)",
+            boxShadow: "0 0 0 1px var(--accent)",
           }}
         />
       </Field.Root>
@@ -166,8 +166,8 @@ const Login = ({ inviteCode }) => {
           color="white"
           borderRadius="lg"
           _focus={{
-            borderColor: "#22D3EE",
-            boxShadow: "0 0 0 1px #22D3EE",
+            borderColor: "var(--accent-light)",
+            boxShadow: "0 0 0 1px var(--accent)",
           }}
         />
       </Field.Root>
@@ -176,12 +176,12 @@ const Login = ({ inviteCode }) => {
         width="100%"
         onClick={submitHandler}
         loading={loading}
-        bg="#22D3EE"
-        color="#0B0D12"
+        bg="var(--accent)"
+        color="var(--on-accent)"
         fontWeight="bold"
         borderRadius="lg"
         _hover={{
-          bg: "#06B6D4",
+          bg: "var(--accent-strong)",
           transform: "translateY(-1px)",
         }}
         transition="all 0.2s"

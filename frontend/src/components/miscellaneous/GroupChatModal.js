@@ -136,8 +136,8 @@ const GroupChatModal = ({ children }) => {
           transition="all 0.2s ease"
           _hover={{
             bg: "gray.600",
-            borderColor: "#1cb2c9",
-            boxShadow: "0 0 15px rgba(28,178,201,0.2)",
+            borderColor: "var(--accent)",
+            boxShadow: "0 0 15px color-mix(in srgb, var(--accent) 20%, transparent)",
             transform: "translateY(-1px)",
           }}
         >
@@ -152,25 +152,20 @@ const GroupChatModal = ({ children }) => {
         <Dialog.Backdrop bg="rgba(0,0,0,0.65)" backdropFilter="blur(4px)" />
         <Dialog.Positioner>
           <Dialog.Content
-            bg="rgba(8,12,28,0.98)"
+            bg="var(--panel-strong)"
             color="white"
             borderRadius="20px"
             border="1px solid"
-            borderColor="rgba(34,211,238,0.15)"
+            borderColor="color-mix(in srgb, var(--accent) 15%, transparent)"
             backdropFilter="blur(20px)"
             boxShadow="0 20px 50px rgba(0,0,0,0.5)"
           >
             <Dialog.Header>
-              <Dialog.Title
-                fontSize={"35px"}
-                fontFamily={"Work Sans"}
-                d="flex"
-                justifyContent={"center"}
-              >
-                Create Group Chat
+              <Dialog.Title fontSize="xl" fontWeight="700">
+                Create a group
               </Dialog.Title>
             </Dialog.Header>
-            <Dialog.Body d="flex" flexDir={"column"} alignItems={"center"}>
+            <Dialog.Body display="flex" flexDir="column" gap={1}>
               <Field.Root>
                 <Field.Label>Name</Field.Label>
                 <Input
@@ -222,11 +217,19 @@ const GroupChatModal = ({ children }) => {
             </Dialog.Body>
             <Dialog.Footer>
               <Dialog.ActionTrigger asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="ghost" color="gray.300" _hover={{ bg: "rgba(255,255,255,0.08)" }}>
+                  Cancel
+                </Button>
               </Dialog.ActionTrigger>
 
-              <Button colorScheme={"blue"} onClick={handleSubmit}>
-                Save
+              <Button
+                onClick={handleSubmit}
+                bg="var(--accent)"
+                color="var(--on-accent)"
+                fontWeight="600"
+                _hover={{ bg: "var(--accent-strong)" }}
+              >
+                Create group
               </Button>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>

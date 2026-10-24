@@ -12,17 +12,17 @@ const cardProps = {
   p: 5,
   bg: "rgba(255,255,255,0.03)",
   border: "1px solid",
-  borderColor: "rgba(34,211,238,0.12)",
+  borderColor: "color-mix(in srgb, var(--accent) 12%, transparent)",
   borderRadius: "18px",
   color: "white",
 };
 
 const accentButton = {
-  bg: "#22D3EE",
-  color: "#0B0D12",
+  bg: "var(--accent)",
+  color: "var(--on-accent)",
   fontWeight: "bold",
   borderRadius: "lg",
-  _hover: { bg: "#06B6D4" },
+  _hover: { bg: "var(--accent-strong)" },
 };
 
 const CardTitle = ({ icon, children }) => (
@@ -31,8 +31,8 @@ const CardTitle = ({ icon, children }) => (
       w="38px"
       h="38px"
       borderRadius="12px"
-      bg="rgba(34,211,238,0.12)"
-      color="#22D3EE"
+      bg="color-mix(in srgb, var(--accent) 12%, transparent)"
+      color="var(--accent-light)"
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -235,7 +235,7 @@ const WelcomePanel = () => {
           </Text>
 
           {roomsLoading ? (
-            <Spinner color="#22D3EE" alignSelf="center" />
+            <Spinner color="var(--accent-light)" alignSelf="center" />
           ) : (
             rooms.map((room) => (
               <Box

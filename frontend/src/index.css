@@ -1,0 +1,30 @@
+/*
+  Babble colour palette: change these to re-theme the whole app.
+  --accent is used behind white text, so keep it dark enough to read
+  (about 4.5:1 contrast with white).
+*/
+:root {
+  --bg: #0d0e1a;
+  --bg-2: #15162b;
+  --panel: rgba(20, 20, 40, 0.94);
+  --panel-strong: rgba(16, 16, 32, 0.98);
+  --topbar: rgba(17, 17, 34, 0.88);
+
+  --accent: #7461f0;
+  --accent-strong: #6450e6;
+  --accent-light: #b3a8ff;
+  --on-accent: #ffffff;
+
+  --chat-bg: #11121f;
+  --bubble-mine: linear-gradient(135deg, #7d6bf3 0%, #6450e6 100%);
+  --bubble-theirs: #23243d;
+
+  /* Rubik is loaded in App.css; these are Chakra's font settings */
+  --chakra-fonts-body: "Rubik", system-ui, sans-serif;
+  --chakra-fonts-heading: "Rubik", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}

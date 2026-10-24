@@ -22,7 +22,7 @@ const CatchUpSidebar = ({ isOpen, onClose, summary }) => {
         right="0"
         w={{ base: "100%", md: "380px" }}
         h="100vh"
-        bg="#111827"
+        bg="var(--panel-strong)"
         color="white"
         p={5}
         zIndex="1000"
@@ -77,7 +77,7 @@ const CatchUpSidebar = ({ isOpen, onClose, summary }) => {
         <VStack align="start" spacing={4}>
           {summary?.decisions?.length > 0 && (
             <Box>
-              <Text fontWeight="600" color="cyan.300" mb={2}>
+              <Text fontWeight="600" color="var(--accent-light)" mb={2}>
                 Decisions
               </Text>
 

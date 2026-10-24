@@ -1,5 +1,13 @@
-import React, { useState } from "react";
-import { VStack, Field, Input, Button } from "@chakra-ui/react";
+import React, { useRef, useState } from "react";
+import {
+  VStack,
+  Field,
+  Input,
+  Button,
+  Avatar,
+  Box,
+  Text,
+} from "@chakra-ui/react";
 import { PasswordInput } from "../ui/password-input";
 import { toaster } from "../ui/toaster";
 import axios from "axios";
@@ -17,59 +25,47 @@ const Signup = ({ inviteCode }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [profilePicture, setProfilePicture] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
   const history = useHistory();
 
   const postDetails = (file) => {
-    console.log("postDetails called");
-    setLoading(true);
+    if (!file) return;
 
-    if (!file) {
-      toaster.create({
-        description: "Please select a file",
-        type: "warning",
-        closable: true,
-      });
-
-      setLoading(false);
-      return;
-    }
-
-    if (file.type === "image/jpeg" || file.type === "image/png") {
-      const data = new FormData();
-
-      data.append("file", file);
-      data.append("upload_preset", "OGC-Mern-Chat-App");
-      data.append("cloud_name", "dbkqtoa4t");
-
-      fetch("https://api.cloudinary.com/v1_1/dbkqtoa4t/image/upload", {
-        method: "POST",
-        body: data,
-      })
-        .then((res) => {
-          console.log("Status:", res.status);
-          return res.json();
-        })
-
-        .then((data) => {
-          console.log("Cloudinary Response:", data);
-
-          setProfilePicture(data.secure_url);
-          setLoading(false);
-        })
-
-        .catch((err) => {
-          console.log("Upload Error:", err);
-          setLoading(false);
-        });
-    } else {
+    if (file.type !== "image/jpeg" && file.type !== "image/png") {
       toaster.create({
         description: "Please select an image file (jpeg or png)",
         type: "warning",
         closable: true,
       });
-
-      setLoading(false);
+      return;
     }
+
+    setUploading(true);
+
+    const data = new FormData();
+
+    data.append("file", file);
+    data.append("upload_preset", "OGC-Mern-Chat-App");
+    data.append("cloud_name", "dbkqtoa4t");
+
+    fetch("https://api.cloudinary.com/v1_1/dbkqtoa4t/image/upload", {
+      method: "POST",
+      body: data,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.secure_url) throw new Error(data.error?.message);
+        setProfilePicture(data.secure_url);
+      })
+      .catch(() => {
+        toaster.create({
+          description: "Photo upload failed. You can add one later.",
+          type: "error",
+          closable: true,
+        });
+      })
+      .finally(() => setUploading(false));
   };
 
   const submitHandler = async () => {
@@ -212,8 +208,8 @@ const Signup = ({ inviteCode }) => {
             color: "gray.500",
           }}
           _focus={{
-            borderColor: "#22D3EE",
-            boxShadow: "0 0 0 1px #22D3EE",
+            borderColor: "var(--accent-light)",
+            boxShadow: "0 0 0 1px var(--accent)",
           }}
         />
       </Field.Root>
@@ -237,8 +233,8 @@ const Signup = ({ inviteCode }) => {
             color: "gray.500",
           }}
           _focus={{
-            borderColor: "#22D3EE",
-            boxShadow: "0 0 0 1px #22D3EE",
+            borderColor: "var(--accent-light)",
+            boxShadow: "0 0 0 1px var(--accent)",
           }}
         />
       </Field.Root>
@@ -257,8 +253,8 @@ const Signup = ({ inviteCode }) => {
           color="white"
           borderRadius="lg"
           _focus={{
-            borderColor: "#22D3EE",
-            boxShadow: "0 0 0 1px #22D3EE",
+            borderColor: "var(--accent-light)",
+            boxShadow: "0 0 0 1px var(--accent)",
           }}
         />
       </Field.Root>
@@ -277,40 +273,59 @@ const Signup = ({ inviteCode }) => {
           color="white"
           borderRadius="lg"
           _focus={{
-            borderColor: "#22D3EE",
-            boxShadow: "0 0 0 1px #22D3EE",
+            borderColor: "var(--accent-light)",
+            boxShadow: "0 0 0 1px var(--accent)",
           }}
         />
       </Field.Root>
 
-      <Field.Root>
-        <Field.Label color="gray.300" fontWeight="medium">
-          Profile Picture
-        </Field.Label>
+      <Box display="flex" alignItems="center" gap={4}>
+        <Avatar.Root size="lg">
+          <Avatar.Image src={profilePicture || undefined} />
+          <Avatar.Fallback name={name || undefined} />
+        </Avatar.Root>
 
-        <Input
+        <Box>
+          <Button
+            size="sm"
+            variant="outline"
+            color="white"
+            borderColor="rgba(255,255,255,0.2)"
+            _hover={{ bg: "rgba(255,255,255,0.08)" }}
+            loading={uploading}
+            loadingText="Uploading..."
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <i className="fa-solid fa-camera" />
+            {profilePicture ? "Change photo" : "Upload photo"}
+          </Button>
+          <Text fontSize="xs" color="gray.500" mt={1}>
+            Optional · JPG or PNG
+          </Text>
+        </Box>
+
+        {/* the real file picker stays hidden behind the button above */}
+        <input
+          ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png"
+          hidden
           onChange={(e) => postDetails(e.target.files[0])}
-          bg="rgba(255,255,255,0.05)"
-          border="1px solid"
-          borderColor="rgba(255,255,255,0.12)"
-          color="gray.300"
-          borderRadius="lg"
         />
-      </Field.Root>
+      </Box>
 
       <Button
         width="100%"
         mt={3}
         onClick={submitHandler}
         loading={loading}
-        bg="#22D3EE"
-        color="#0B0D12"
+        disabled={uploading}
+        bg="var(--accent)"
+        color="var(--on-accent)"
         fontWeight="bold"
         borderRadius="lg"
         _hover={{
-          bg: "#06B6D4",
+          bg: "var(--accent-strong)",
           transform: "translateY(-1px)",
         }}
         transition="all 0.2s"

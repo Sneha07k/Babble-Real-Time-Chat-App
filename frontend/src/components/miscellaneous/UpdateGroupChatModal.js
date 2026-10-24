@@ -162,24 +162,42 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <Text cursor="pointer" color="blue.300" fontSize={"25px"}>
+        <Box
+          as="button"
+          type="button"
+          title="Group settings"
+          aria-label="Group settings"
+          w="38px"
+          h="38px"
+          flexShrink={0}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          borderRadius="full"
+          color="gray.300"
+          bg="rgba(255,255,255,0.06)"
+          cursor="pointer"
+          _hover={{ bg: "rgba(255,255,255,0.12)", color: "white" }}
+        >
           <i className="fa-solid fa-users"></i>
-        </Text>
+        </Box>
       </Dialog.Trigger>
       <Portal>
         <Dialog.Backdrop bg="rgba(0,0,0,0.7)" backdropFilter="blur(6px)" />
         <Dialog.Positioner>
           <Dialog.Content
-            bg="rgba(8,12,28,0.98)"
+            bg="var(--panel-strong)"
             color="white"
             borderRadius="20px"
             border="1px solid"
-            borderColor="rgba(34,211,238,0.15)"
+            borderColor="color-mix(in srgb, var(--accent) 15%, transparent)"
             backdropFilter="blur(20px)"
             boxShadow="0 20px 50px rgba(0,0,0,0.5)"
           >
             <Dialog.Header>
-              <Dialog.Title>{selectedChat.chatName}</Dialog.Title>
+              <Dialog.Title fontSize="xl" fontWeight="700">
+                {selectedChat.chatName}
+              </Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
               <Box w="100%" display={"flex"} flexWrap={"wrap"} pb={3}>
@@ -202,8 +220,10 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
                 </Field.Root>
                 <Button
                   variant="solid"
-                  colorScheme={"teal"}
-                  backgroundColor={"teal.500"}
+                  bg="var(--accent)"
+                  color="var(--on-accent)"
+                  fontWeight="600"
+                  _hover={{ bg: "var(--accent-strong)" }}
                   ml={1}
                   loading={renameLoading}
                   onClick={handleRename}
@@ -237,10 +257,14 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain, fetchMessages }) => {
             <Dialog.Footer>
               <Dialog.ActionTrigger asChild>
                 <Button
-                  variant="outline"
                   onClick={() => handleRemove(user)}
-                  backgroundColor={"red"}
+                  bg="rgba(239,68,68,0.12)"
+                  color="#FCA5A5"
+                  border="1px solid rgba(239,68,68,0.3)"
+                  fontWeight="600"
+                  _hover={{ bg: "rgba(239,68,68,0.22)", color: "#FECACA" }}
                 >
+                  <i className="fa-solid fa-arrow-right-from-bracket" />
                   Leave Group
                 </Button>
               </Dialog.ActionTrigger>

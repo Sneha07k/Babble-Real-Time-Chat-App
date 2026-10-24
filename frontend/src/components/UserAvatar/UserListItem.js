@@ -19,8 +19,8 @@ const UserListItem = ({ user, handleFunction }) => {
       borderColor="rgba(255,255,255,0.05)"
       transition="all 0.2s ease"
       _hover={{
-        bg: "rgba(34,211,238,0.15)",
-        borderColor: "rgba(34,211,238,0.25)",
+        bg: "color-mix(in srgb, var(--accent) 15%, transparent)",
+        borderColor: "color-mix(in srgb, var(--accent) 25%, transparent)",
         transform: "translateY(-1px)",
       }}
     >

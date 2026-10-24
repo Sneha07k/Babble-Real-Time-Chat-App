@@ -12,12 +12,12 @@ const ChatBox = ({ fetchAgain, setFetchAgain }) => {
       flexDir="column"
       alignItems="center"
       p={4}
-      bg="rgba(12, 18, 35, 0.95)"
+      bg="var(--panel)"
       h="97.5%"
       w={{ base: "100%", md: "68%" }}
       borderRadius="18px"
       border="1px solid"
-      borderColor="rgba(0, 255, 255, 0.12)"
+      borderColor="color-mix(in srgb, var(--accent) 12%, transparent)"
       color="white"
       boxShadow="0 8px 32px rgba(0, 0, 0, 0.35)"
       backdropFilter="blur(10px)"

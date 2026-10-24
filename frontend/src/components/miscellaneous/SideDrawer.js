@@ -26,6 +26,24 @@ import { useHistory } from "react-router-dom";
 import { toaster } from "../ui/toaster";
 import { getSender } from "../../config/ChatLogics";
 
+const menuStyle = {
+  bg: "var(--panel-strong)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  borderRadius: "14px",
+  boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+  minW: "240px",
+  p: 1,
+};
+
+const menuItemStyle = {
+  borderRadius: "10px",
+  color: "gray.100",
+  gap: 3,
+  py: 2,
+  cursor: "pointer",
+  _highlighted: { bg: "color-mix(in srgb, var(--accent) 18%, transparent)" },
+};
+
 const SideDrawer = () => {
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
@@ -141,7 +159,7 @@ const SideDrawer = () => {
       alignItems="center"
       justifyContent="space-between"
       px={5}
-      bg="rgba(15,18,26,0.85)"
+      bg="var(--topbar)"
       backdropFilter="blur(14px)"
       borderBottom="1px solid"
       borderColor="rgba(255,255,255,0.08)"
@@ -159,12 +177,14 @@ const SideDrawer = () => {
             borderColor="rgba(255,255,255,0.12)"
             color="gray.200"
             _hover={{
-              bg: "rgba(34,211,238,0.15)",
-              color: "#22D3EE",
+              bg: "color-mix(in srgb, var(--accent) 15%, transparent)",
+              color: "var(--accent-light)",
             }}
           >
             <i className="fa-solid fa-magnifying-glass"></i>
-            Search User
+            <Text as="span" display={{ base: "none", md: "inline" }}>
+              Search User
+            </Text>
           </Button>
         </Drawer.Trigger>
 
@@ -173,10 +193,10 @@ const SideDrawer = () => {
 
           <Drawer.Positioner>
             <Drawer.Content
-              bg="rgba(8,12,28,0.98)"
+              bg="var(--panel-strong)"
               color="white"
               borderLeft="1px solid"
-              borderColor="rgba(34,211,238,0.15)"
+              borderColor="color-mix(in srgb, var(--accent) 15%, transparent)"
               backdropFilter="blur(20px)"
               boxShadow="-10px 0 30px rgba(0,0,0,0.4)"
             >
@@ -184,7 +204,7 @@ const SideDrawer = () => {
 
               {loadingChat && (
                 <Box display="flex" justifyContent="center" py={3}>
-                  <Spinner size="xl" color="#22D3EE" borderWidth="4px" />
+                  <Spinner size="xl" color="var(--accent-light)" borderWidth="4px" />
                 </Box>
               )}
 
@@ -203,17 +223,17 @@ const SideDrawer = () => {
                         color: "gray.500",
                       }}
                       _focus={{
-                        borderColor: "#22D3EE",
-                        boxShadow: "0 0 0 1px #22D3EE",
+                        borderColor: "var(--accent-light)",
+                        boxShadow: "0 0 0 1px var(--accent)",
                       }}
                     />
                     <Button
-                      bg="#22D3EE"
+                      bg="var(--accent)"
                       color="black"
                       fontWeight="600"
                       minW="70px"
                       _hover={{
-                        bg: "#67E8F9",
+                        bg: "var(--accent-light)",
                       }}
                       onClick={handleSearch}
                     >
@@ -282,9 +302,12 @@ const SideDrawer = () => {
                   position="absolute"
                   top="-8px"
                   right="-8px"
-                  bg="red"
+                  bg="#EF4444"
                   color="white"
                   borderRadius="full"
+                  fontSize="10px"
+                  minW="18px"
+                  justifyContent="center"
                 >
                   {notification.length}
                 </Badge>
@@ -294,15 +317,21 @@ const SideDrawer = () => {
 
           <Portal>
             <Menu.Positioner>
-              <Menu.Content>
+              <Menu.Content {...menuStyle}>
+                <Text px={3} pt={2} pb={1} fontSize="xs" fontWeight="700" color="gray.400" textTransform="uppercase" letterSpacing="0.5px">
+                  Notifications
+                </Text>
                 {Object.values(groupedNotifications).length === 0 && (
-                  <Menu.Item value="none">No new messages</Menu.Item>
+                  <Menu.Item value="none" color="gray.400" {...menuItemStyle}>
+                    <i className="fa-regular fa-bell-slash" /> You're all caught up
+                  </Menu.Item>
                 )}
 
                 {Object.values(groupedNotifications).map((group) => (
                   <Menu.Item
                     key={group.chat._id}
                     value={group.chat._id}
+                    {...menuItemStyle}
                     onClick={() => {
                       setSelectedChat(group.chat);
 
@@ -376,13 +405,28 @@ const SideDrawer = () => {
 
           <Portal>
             <Menu.Positioner>
-              <Menu.Content>
-                <Menu.Item value="profile" onClick={() => setProfileOpen(true)}>
-                  My Profile
+              <Menu.Content {...menuStyle}>
+                <Box px={3} pt={2} pb={2}>
+                  <Text fontWeight="700" color="white" truncate>
+                    {user.name}
+                  </Text>
+                  <Text fontSize="xs" color="gray.400" truncate>
+                    {user.email}
+                  </Text>
+                </Box>
+                <Menu.Separator borderColor="rgba(255,255,255,0.08)" />
+                <Menu.Item value="profile" onClick={() => setProfileOpen(true)} {...menuItemStyle}>
+                  <i className="fa-regular fa-user" /> My profile
                 </Menu.Item>
 
-                <Menu.Item value="logout" onClick={logoutHandler}>
-                  Logout
+                <Menu.Item
+                  value="logout"
+                  onClick={logoutHandler}
+                  {...menuItemStyle}
+                  color="#FCA5A5"
+                  _highlighted={{ bg: "rgba(239,68,68,0.15)" }}
+                >
+                  <i className="fa-solid fa-arrow-right-from-bracket" /> Log out
                 </Menu.Item>
               </Menu.Content>
             </Menu.Positioner>

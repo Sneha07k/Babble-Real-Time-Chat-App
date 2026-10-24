@@ -5,7 +5,7 @@ import { toaster } from "./ui/toaster";
 import { Box, Button, Stack,Spinner } from "@chakra-ui/react";
 import ChatLoading from "./ChatLoading";
 import { Text } from "@chakra-ui/react";
-import { getSender } from "../config/ChatLogics";
+import { getSender, formatChatListTime } from "../config/ChatLogics";
 import GroupChatModal from "./miscellaneous/GroupChatModal";
 import { Avatar } from "@chakra-ui/react";
 import WelcomePanel from "./WelcomePanel";
@@ -21,8 +21,8 @@ const ChatTag = ({ children }) => (
     fontWeight="700"
     letterSpacing="0.5px"
     textTransform="uppercase"
-    bg="rgba(34,211,238,0.15)"
-    color="#67E8F9"
+    bg="color-mix(in srgb, var(--accent) 15%, transparent)"
+    color="var(--accent-light)"
     verticalAlign="middle"
   >
     {children}
@@ -35,8 +35,37 @@ const MyChats = ({ fetchAgain }) => {
   // phones only: the right-hand welcome panel is hidden there
   const [showWelcome, setShowWelcome] = useState(false);
 
-  const { selectedChat, setSelectedChat, user, chats, setChats, socket } =
-    ChatState();
+  const {
+    selectedChat,
+    setSelectedChat,
+    user,
+    chats,
+    setChats,
+    socket,
+    notification,
+    setNotification,
+  } = ChatState();
+
+  // unread = messages that arrived while that chat wasn't open
+  const unreadCount = (chat) =>
+    notification.filter((n) => n.chat._id === chat._id).length;
+
+  const lastMessagePreview = (chat) => {
+    const last = chat.latestMessage;
+    if (!last) return "No messages yet";
+    const senderId = last.sender?._id || last.sender;
+    if (senderId === user._id) return `You: ${last.content}`;
+    // in groups, show who said it
+    if (chat.isGroupChat && last.sender?.name) {
+      return `${last.sender.name.split(" ")[0]}: ${last.content}`;
+    }
+    return last.content;
+  };
+
+  const openChat = (chat) => {
+    setSelectedChat(chat);
+    setNotification((prev) => prev.filter((n) => n.chat._id !== chat._id));
+  };
 
  const fetchChats = async () => {
    try {
@@ -101,13 +130,13 @@ const MyChats = ({ fetchAgain }) => {
       display={{ base: selectedChat ? "none" : "flex", md: "flex" }}
       flexDir="column"
       p={4}
-      bg="rgba(8,12,28,0.95)"
+      bg="var(--panel)"
       backdropFilter="blur(12px)"
       h="97.5%"
       w={{ base: "100%", md: "31%" }}
       borderRadius="20px"
       border="1px solid"
-      borderColor="rgba(0,255,255,0.08)"
+      borderColor="color-mix(in srgb, var(--accent) 8%, transparent)"
       boxShadow="0 8px 30px rgba(0,0,0,0.45)"
     >
       <Box
@@ -131,8 +160,8 @@ const MyChats = ({ fetchAgain }) => {
             display={{ base: "flex", md: "none" }}
             size="sm"
             borderRadius="12px"
-            bg={showWelcome ? "#22D3EE" : "rgba(255,255,255,0.08)"}
-            color={showWelcome ? "#0B0D12" : "white"}
+            bg={showWelcome ? "var(--accent)" : "rgba(255,255,255,0.08)"}
+            color={showWelcome ? "var(--bg)" : "white"}
             onClick={() => setShowWelcome((prev) => !prev)}
             aria-label="Get started"
           >
@@ -178,7 +207,7 @@ const MyChats = ({ fetchAgain }) => {
             alignItems="center"
             h="100%"
           >
-            <Spinner size="xl" color="#22D3EE" borderWidth="4px" />
+            <Spinner size="xl" color="var(--accent-light)" borderWidth="4px" />
           </Box>
         ) : (
           <Stack
@@ -189,7 +218,7 @@ const MyChats = ({ fetchAgain }) => {
                 width: "6px",
               },
               "&::-webkit-scrollbar-thumb": {
-                background: "#22d3ee",
+                background: "var(--accent)",
                 borderRadius: "10px",
               },
             }}
@@ -197,18 +226,18 @@ const MyChats = ({ fetchAgain }) => {
             {chats.map((chat) => (
               <Box
                 key={chat._id}
-                onClick={() => setSelectedChat(chat)}
+                onClick={() => openChat(chat)}
                 cursor="pointer"
                 bg={
                   selectedChat?._id === chat._id
-                    ? "rgba(34,211,238,0.22)"
+                    ? "color-mix(in srgb, var(--accent) 22%, transparent)"
                     : "rgba(255,255,255,0.03)"
                 }
                 color="white"
                 _hover={{
                   bg:
                     selectedChat?._id === chat._id
-                      ? "rgba(34,211,238,0.28)"
+                      ? "color-mix(in srgb, var(--accent) 28%, transparent)"
                       : "rgba(255,255,255,0.06)",
                 }}
                 borderRadius="16px"
@@ -218,7 +247,7 @@ const MyChats = ({ fetchAgain }) => {
                 border="1px solid"
                 borderColor={
                   selectedChat?._id === chat._id
-                    ? "rgba(34,211,238,0.25)"
+                    ? "color-mix(in srgb, var(--accent) 25%, transparent)"
                     : "transparent"
                 }
               >
@@ -245,25 +274,62 @@ const MyChats = ({ fetchAgain }) => {
                     />
                   </Avatar.Root>
 
-                  <Box overflow="hidden" flex="1">
-                    <Text fontWeight="600" fontSize="md" color="white">
-                      {!chat.isGroupChat
-                        ? getSender(loggedUser, chat.users)
-                        : chat.chatName}
-                      {!chat.isGroupChat &&
-                        chat.users.some((u) => u.isBot) && <ChatTag>AI</ChatTag>}
-                      {chat.isCommunity && <ChatTag>Community</ChatTag>}
-                    </Text>
+                  <Box overflow="hidden" flex="1" minW={0}>
+                    <Box display="flex" alignItems="baseline" gap={2}>
+                      <Text
+                        fontWeight="600"
+                        fontSize="md"
+                        color="white"
+                        flex="1"
+                        minW={0}
+                        truncate
+                      >
+                        {!chat.isGroupChat
+                          ? getSender(loggedUser, chat.users)
+                          : chat.chatName}
+                        {!chat.isGroupChat &&
+                          chat.users.some((u) => u.isBot) && <ChatTag>AI</ChatTag>}
+                        {chat.isCommunity && <ChatTag>Community</ChatTag>}
+                      </Text>
+                      <Text
+                        fontSize="xs"
+                        flexShrink={0}
+                        color={unreadCount(chat) ? "var(--accent-light)" : "gray.500"}
+                      >
+                        {formatChatListTime(chat.latestMessage?.createdAt)}
+                      </Text>
+                    </Box>
 
-                    <Text
-                      fontSize="sm"
-                      color="gray.400"
-                      overflow="hidden"
-                      whiteSpace="nowrap"
-                      textOverflow="ellipsis"
-                    >
-                      {chat.latestMessage?.content || "No messages yet"}
-                    </Text>
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Text
+                        fontSize="sm"
+                        color="gray.400"
+                        flex="1"
+                        minW={0}
+                        truncate
+                      >
+                        {lastMessagePreview(chat)}
+                      </Text>
+                      {unreadCount(chat) > 0 && (
+                        <Text
+                          as="span"
+                          flexShrink={0}
+                          minW="20px"
+                          h="20px"
+                          px="6px"
+                          borderRadius="full"
+                          bg="var(--accent)"
+                          color="var(--on-accent)"
+                          fontSize="11px"
+                          fontWeight="700"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          {unreadCount(chat)}
+                        </Text>
+                      )}
+                    </Box>
                   </Box>
                 </Box>
               </Box>

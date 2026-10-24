@@ -5,9 +5,9 @@
   display: flex;
 
   background: linear-gradient(135deg,
-      #0b0d12 0%,
-      #141824 50%,
-      #1a2030 100%);
+      var(--bg) 0%,
+      var(--bg-2) 50%,
+      var(--bg-2) 100%);
 
   color: white;
 }

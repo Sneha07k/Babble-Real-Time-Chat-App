@@ -38,8 +38,8 @@ const OtpStep = ({ email, onVerify, onResend, onBack, loading }) => {
               color="white"
               borderRadius="lg"
               _focus={{
-                borderColor: "#22D3EE",
-                boxShadow: "0 0 0 1px #22D3EE",
+                borderColor: "var(--accent-light)",
+                boxShadow: "0 0 0 1px var(--accent)",
               }}
             />
           ))}
@@ -51,11 +51,11 @@ const OtpStep = ({ email, onVerify, onResend, onBack, loading }) => {
         onClick={() => onVerify(code.join(""))}
         disabled={!complete}
         loading={loading}
-        bg="#22D3EE"
-        color="#0B0D12"
+        bg="var(--accent)"
+        color="var(--on-accent)"
         fontWeight="bold"
         borderRadius="lg"
-        _hover={{ bg: "#06B6D4" }}
+        _hover={{ bg: "var(--accent-strong)" }}
       >
         Verify
       </Button>
@@ -71,8 +71,8 @@ const OtpStep = ({ email, onVerify, onResend, onBack, loading }) => {
         </Text>
         <Text
           as="button"
-          color="#22D3EE"
-          _hover={{ color: "#67E8F9" }}
+          color="var(--accent-light)"
+          _hover={{ color: "var(--accent-light)" }}
           onClick={onResend}
         >
           Resend code

@@ -11,10 +11,10 @@ const UserBadgeItem = ({ user, handleFunction }) => {
       py={1.5}
       borderRadius="full"
       m={1}
-      bg="rgba(34,211,238,0.15)"
+      bg="color-mix(in srgb, var(--accent) 15%, transparent)"
       border="1px solid"
-      borderColor="rgba(34,211,238,0.25)"
-      color="#67E8F9"
+      borderColor="color-mix(in srgb, var(--accent) 25%, transparent)"
+      color="var(--accent-light)"
       fontSize="sm"
       fontWeight="500"
       cursor="pointer"

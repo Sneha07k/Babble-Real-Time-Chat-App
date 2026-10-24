@@ -51,3 +51,43 @@ export const isSameUser = (messages, m, i) => {
 
   return i > 0 && prevSenderId === currentSenderId;
 };
+// ---- times and dates shown in the chat UI ----
+
+const startOfDay = (date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+const daysAgo = (date) =>
+  Math.round((startOfDay(new Date()) - startOfDay(date)) / 86400000);
+
+// "14:05" (follows the viewer's locale: 12h or 24h)
+export const formatTime = (date) =>
+  new Date(date).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+export const isSameDay = (a, b) =>
+  !!a && !!b && startOfDay(a).getTime() === startOfDay(b).getTime();
+
+// separator between days: "Today", "Yesterday", "Monday", "12 Oct 2026"
+export const formatDayLabel = (date) => {
+  const diff = daysAgo(date);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  if (diff < 7) return new Date(date).toLocaleDateString([], { weekday: "long" });
+  return new Date(date).toLocaleDateString([], {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+// right side of a chat list row: time today, otherwise a short date
+export const formatChatListTime = (date) => {
+  if (!date) return "";
+  const diff = daysAgo(date);
+  if (diff === 0) return formatTime(date);
+  if (diff === 1) return "Yesterday";
+  if (diff < 7) return new Date(date).toLocaleDateString([], { weekday: "short" });
+  return new Date(date).toLocaleDateString([], { day: "numeric", month: "short" });
+};

@@ -35,7 +35,7 @@ const Homepage = () => {
     <Box
       minH="100vh"
       w="100%"
-      bg="linear-gradient(135deg, #0B0D12 0%, #141824 100%)"
+      bg="linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 100%)"
       display="flex"
       flexDirection="column"
       alignItems="center"
@@ -67,9 +67,9 @@ const Homepage = () => {
           alignItems="center"
           gap={3}
           borderRadius="xl"
-          bg="rgba(34,211,238,0.08)"
+          bg="color-mix(in srgb, var(--accent) 8%, transparent)"
           border="1px solid"
-          borderColor="rgba(34,211,238,0.25)"
+          borderColor="color-mix(in srgb, var(--accent) 25%, transparent)"
         >
           <Avatar.Root size="sm">
             <Avatar.Image src={inviter.picture} />
@@ -85,14 +85,14 @@ const Homepage = () => {
       {/* Auth Card */}
       <Box
         w={{ base: "90%", md: "450px" }}
-        bg="rgba(20,22,28,0.85)"
+        bg="var(--panel)"
         backdropFilter="blur(18px)"
         borderRadius="2xl"
         borderWidth="1px"
         borderColor="rgba(255,255,255,0.08)"
         boxShadow="
           0 25px 50px rgba(0,0,0,0.55),
-          0 0 20px rgba(34,211,238,0.08)
+          0 0 20px color-mix(in srgb, var(--accent) 8%, transparent)
         "
       >
         <Tabs.Root defaultValue={inviteCode ? "signup" : "login"} colorScheme="cyan" w="100%" p={2}>
@@ -109,8 +109,8 @@ const Homepage = () => {
               color="gray.400"
               fontWeight="bold"
               _selected={{
-                color: "#22D3EE",
-                borderColor: "#22D3EE",
+                color: "var(--accent-light)",
+                borderColor: "var(--accent-light)",
               }}
               _hover={{
                 color: "gray.200",
@@ -127,8 +127,8 @@ const Homepage = () => {
               color="gray.400"
               fontWeight="bold"
               _selected={{
-                color: "#22D3EE",
-                borderColor: "#22D3EE",
+                color: "var(--accent-light)",
+                borderColor: "var(--accent-light)",
               }}
               _hover={{
                 color: "gray.200",

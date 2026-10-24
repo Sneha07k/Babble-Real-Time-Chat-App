@@ -45,11 +45,11 @@ const ProfileModal = ({ user, open, setOpen }) => {
 
         <Dialog.Positioner>
           <Dialog.Content
-            bg="rgba(8,12,28,0.98)"
+            bg="var(--panel-strong)"
             color="white"
             borderRadius="20px"
             border="1px solid"
-            borderColor="rgba(34,211,238,0.15)"
+            borderColor="color-mix(in srgb, var(--accent) 15%, transparent)"
             backdropFilter="blur(20px)"
             boxShadow="0 20px 50px rgba(0,0,0,0.5)"
             maxW="420px"
@@ -80,8 +80,8 @@ const ProfileModal = ({ user, open, setOpen }) => {
                   boxSize="160px"
                   objectFit="cover"
                   border="4px solid"
-                  borderColor="rgba(34,211,238,0.4)"
-                  boxShadow="0 0 25px rgba(34,211,238,0.15)"
+                  borderColor="color-mix(in srgb, var(--accent) 40%, transparent)"
+                  boxShadow="0 0 25px color-mix(in srgb, var(--accent) 15%, transparent)"
                 />
 
                 <Text fontSize="lg" color="gray.300" textAlign="center">
@@ -108,7 +108,7 @@ const ProfileModal = ({ user, open, setOpen }) => {
                       </Text>
                     </Box>
                     <Switch.Root
-                      colorPalette="cyan"
+                      colorPalette="purple"
                       checked={Boolean(loggedUser.twoFactorEnabled)}
                       disabled={saving}
                       onCheckedChange={(e) => toggleTwoFactor(e.checked)}

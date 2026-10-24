@@ -46,9 +46,9 @@ const InvitePage = () => {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      bg="linear-gradient(135deg, #0B0D12 0%, #141824 100%)"
+      bg="linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 100%)"
     >
-      <Spinner size="xl" color="#22D3EE" borderWidth="4px" />
+      <Spinner size="xl" color="var(--accent-light)" borderWidth="4px" />
     </Box>
   );
 };

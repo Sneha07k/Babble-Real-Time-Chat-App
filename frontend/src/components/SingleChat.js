@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChatState } from "../Context/ChatProvider";
-import { Box, Spinner, Text, Input, IconButton,Button,Avatar } from "@chakra-ui/react";
+import { Box, Spinner, Text, Input, Avatar } from "@chakra-ui/react";
 import { getSender } from "../config/ChatLogics";
 import axios from "axios";
 import "./styles.css";
@@ -21,6 +21,29 @@ const showAiError = (error, fallback) =>
       error.response?.data?.message || error.response?.data?.error || fallback,
     type: "error",
   });
+
+// small circular icon button used in the chat header and input bar
+const RoundButton = React.forwardRef(({ size = "38px", ...props }, ref) => (
+  <Box
+    as="button"
+    type="button"
+    ref={ref}
+    w={size}
+    h={size}
+    flexShrink={0}
+    display="flex"
+    alignItems="center"
+    justifyContent="center"
+    borderRadius="full"
+    color="gray.300"
+    bg="rgba(255,255,255,0.06)"
+    cursor="pointer"
+    transition="all 0.2s"
+    _hover={{ bg: "rgba(255,255,255,0.12)", color: "white" }}
+    _disabled={{ cursor: "not-allowed" }}
+    {...props}
+  />
+));
 
 
 
@@ -259,8 +282,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   }, []);
 
 
-  const sendMessage = async (event) => {
-    if (event.key === "Enter" && newMessage.trim()) {
+  // called by the Enter key and by the send button
+  const sendMessage = async () => {
+    if (newMessage.trim()) {
       clearTimeout(typingTimerRef.current);
       typingRef.current = false;
       socket?.emit("stop typing", selectedChat._id);
@@ -315,7 +339,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         setActiveSuggestion(-1);
         return;
       }
-      sendMessage(e);
+      sendMessage();
     }
 
     if (e.key === "ArrowDown") {
@@ -418,290 +442,292 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       socket.off("message received", handleMessageReceived);
     };
   }, [socket]);
+  const otherUser = selectedChat && !selectedChat.isGroupChat
+    ? selectedChat.users.find((u) => u._id !== user._id)
+    : null;
 
+  const chatTitle = otherUser
+    ? getSender(user, selectedChat.users)
+    : selectedChat?.chatName;
+
+  const memberCount = selectedChat?.users.filter((u) => !u.isBot).length;
+  const chatSubtitle = isTyping
+    ? "typing…"
+    : otherUser?.isBot
+      ? "AI assistant · always online"
+      : otherUser
+        ? otherUser.email
+        : `${memberCount} member${memberCount === 1 ? "" : "s"}`;
 
   return (
     <>
       {selectedChat ? (
         <>
-          <Text
-            fontSize={{ base: "28px", md: "30px" }}
-            pb={3}
-            px={2}
-            pr={4}
+          {/* HEADER */}
+          <Box
             w="100%"
             display="flex"
-            justifyContent="space-between"
             alignItems="center"
+            gap={{ base: 2, md: 3 }}
+            pb={3}
+            px={1}
           >
-            <Text
-              cursor="pointer"
-              fontSize="24px"
-              color="gray.300"
-              _hover={{ color: "white" }}
-              display={{ base: "block", md: "none" }}
+            <RoundButton
+              display={{ base: "flex", md: "none" }}
               onClick={() => setSelectedChat(null)}
-              p={3}
+              aria-label="Back to chats"
             >
-              ←
-            </Text>
+              <i className="fa-solid fa-arrow-left" />
+            </RoundButton>
 
-            {!selectedChat.isGroupChat ? (
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                w="100%"
-              >
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  gap={3}
-                  cursor="pointer"
-                  onClick={() => setOpen(true)}
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={3}
+              flex="1"
+              minW={0}
+              cursor={otherUser ? "pointer" : "default"}
+              onClick={() => otherUser && setOpen(true)}
+            >
+              <Avatar.Root size="md" flexShrink={0}>
+                <Avatar.Image src={otherUser?.picture} />
+                <Avatar.Fallback name={chatTitle} />
+              </Avatar.Root>
+
+              <Box minW={0}>
+                <Text
+                  fontSize="lg"
+                  fontWeight="700"
+                  color="white"
+                  lineHeight="1.2"
+                  truncate
                 >
-                  <img
-                    src={
-                      selectedChat.users.find((u) => u._id !== user._id)
-                        ?.picture
-                    }
-                    alt="profile"
-                    style={{
-                      width: "42px",
-                      height: "42px",
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                      border: "2px solid #4a5568",
-                    }}
-                  />
-
-                  <Text fontSize="lg" fontWeight="600" color="white">
-                    {getSender(user, selectedChat.users)}
-                  </Text>
-                </Box>
-
-                <Box display="flex" alignItems="center" gap={3}>
-                  <button
-                    onClick={handleCatchUp}
-                    style={{
-                      padding: "8px 12px",
-                      borderRadius: "999px",
-                      background: "#1cb2c9",
-                      color: "white",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                      border: "none",
-                      transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#18a3b8";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#1cb2c9";
-                    }}
-                  >
-                    <i className="fa-solid fa-newspaper"></i>
-                  </button>
-                </Box>
-
-                <ProfileModal
-                  user={selectedChat.users.find((u) => u._id !== user._id)}
-                  open={open}
-                  setOpen={setOpen}
-                />
-              </Box>
-            ) : (
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                w="100%"
-              >
-                <Box display="flex" alignItems="center" gap={3}>
-                  <UpdateGroupChatModal
-                    fetchAgain={fetchAgain}
-                    setFetchAgain={setFetchAgain}
-                    fetchMessages={fetchMessages}
-                  />
-
-                  <Text>{selectedChat.chatName}</Text>
-                </Box>
-
-                <button
-                  onClick={handleCatchUp}
-                  style={{
-                    padding: "8px 12px",
-                    borderRadius: "999px",
-                    background: "#1cb2c9",
-                    color: "white",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    border: "none",
-                  }}
+                  {chatTitle}
+                </Text>
+                <Text
+                  fontSize="xs"
+                  color={isTyping ? "var(--accent-light)" : "gray.400"}
+                  fontStyle={isTyping ? "italic" : "normal"}
+                  truncate
                 >
-                  <i className="fa-solid fa-newspaper"></i>
-                </button>
+                  {chatSubtitle}
+                </Text>
               </Box>
+            </Box>
+
+            <RoundButton
+              onClick={handleCatchUp}
+              title="Catch up: AI summary of this chat"
+              aria-label="Catch up"
+              color="var(--accent-light)"
+            >
+              {loadingSummary ? (
+                <Spinner size="sm" />
+              ) : (
+                <i className="fa-solid fa-newspaper" />
+              )}
+            </RoundButton>
+
+            {selectedChat.isGroupChat && (
+              <UpdateGroupChatModal
+                fetchAgain={fetchAgain}
+                setFetchAgain={setFetchAgain}
+                fetchMessages={fetchMessages}
+              />
             )}
-          </Text>
 
+            {otherUser && (
+              <ProfileModal user={otherUser} open={open} setOpen={setOpen} />
+            )}
+          </Box>
+
+          {/* MESSAGES */}
           <Box
             display="flex"
             flexDir="column"
-            p={3}
-            bg="gray.800"
             w="100%"
-            height="100%"
-            borderRadius="lg"
+            flex="1"
             minH={0}
+            bg="var(--chat-bg)"
+            backgroundImage="radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)"
+            backgroundSize="18px 18px"
+            borderRadius="16px"
+            border="1px solid rgba(255,255,255,0.05)"
             overflow="hidden"
           >
             {loading ? (
-              <Spinner size="xl" alignSelf="center" />
+              <Box flex="1" display="flex" alignItems="center" justifyContent="center">
+                <Spinner size="xl" color="var(--accent-light)" />
+              </Box>
             ) : (
               <Box flex="1" minH={0} overflow="hidden">
-                <ScorllableChat messages={messages} />
+                <ScorllableChat
+                  messages={messages}
+                  isGroupChat={selectedChat.isGroupChat}
+                />
               </Box>
             )}
 
             {isTyping && (
-              <Box display="flex" mt={2}>
-                <Box width="60px" height="60px">
-                  <Lottie options={defaultOptions} width={60} height={60} />
-                </Box>
+              <Box px={3} pb={1}>
+                <Lottie options={defaultOptions} width={48} height={48} />
+              </Box>
+            )}
+          </Box>
+
+          {/* INPUT BAR */}
+          <Box
+            mt={3}
+            w="100%"
+            display="flex"
+            alignItems="center"
+            gap={2}
+            position="relative"
+          >
+            {(aiSuggestion.length > 0 || aiLoading) && (
+              <Box
+                ref={aiContainerRef}
+                position="absolute"
+                bottom="100%"
+                left="0"
+                right="0"
+                mb="8px"
+                bg="var(--panel-strong)"
+                border="1px solid"
+                borderColor="color-mix(in srgb, var(--accent) 25%, transparent)"
+                borderRadius="14px"
+                p={2}
+                zIndex={1000}
+                boxShadow="0 10px 30px rgba(0,0,0,0.4)"
+              >
+                <Text fontSize="xs" color="gray.400" px={2} pb={1}>
+                  {aiLoading ? "AI is thinking..." : "Suggested replies (↑ ↓ then Enter)"}
+                </Text>
+
+                {aiSuggestion.map((r, i) => (
+                  <Text
+                    key={i}
+                    cursor="pointer"
+                    bg={
+                      i === activeSuggestion
+                        ? "color-mix(in srgb, var(--accent) 25%, transparent)"
+                        : "transparent"
+                    }
+                    px={2}
+                    py="6px"
+                    borderRadius="8px"
+                    color="white"
+                    fontSize="sm"
+                    onMouseEnter={() => setActiveSuggestion(i)}
+                    onClick={() => {
+                      setNewMessage(r);
+                      setAiSuggestion([]);
+                      setActiveSuggestion(-1);
+                    }}
+                  >
+                    {r}
+                  </Text>
+                ))}
               </Box>
             )}
 
-            <Box mt={3} display="flex" alignItems="center" gap={2}>
+            {showEmojiPicker && (
               <Box
-                position="relative"
+                ref={emojiPickerRef}
+                position="absolute"
+                bottom="100%"
+                left="0"
+                mb="8px"
+                zIndex={2000}
+              >
+                <EmojiPicker
+                  theme="dark"
+                  width={320}
+                  height={380}
+                  onEmojiClick={(emojiData) => {
+                    setNewMessage((prev) => prev + emojiData.emoji);
+                  }}
+                />
+              </Box>
+            )}
+
+            <Box
+              flex="1"
+              minW={0}
+              display="flex"
+              alignItems="center"
+              gap={1}
+              bg="rgba(255,255,255,0.06)"
+              border="1px solid rgba(255,255,255,0.08)"
+              borderRadius="full"
+              pl={1}
+              pr={1}
+              transition="border-color 0.2s"
+              _focusWithin={{ borderColor: "var(--accent)" }}
+            >
+              <RoundButton
+                ref={emojiButtonRef}
+                onClick={() => setShowEmojiPicker((prev) => !prev)}
+                aria-label="Emoji"
+                bg="transparent"
+              >
+                <i className="fa-regular fa-face-smile" />
+              </RoundButton>
+
+              <Input
                 flex="1"
+                minW={0}
+                px={1}
+                border="none"
+                bg="transparent"
+                color="white"
+                placeholder="Type a message"
+                _placeholder={{ color: "gray.500" }}
+                _focus={{ boxShadow: "none", outline: "none" }}
+                value={newMessage}
+                onChange={typingHandler}
+                onKeyDown={handleKeyDown}
+              />
+
+              <Box
+                as="button"
+                type="button"
+                onClick={fetchAISuggestions}
+                title="Ask AI for reply ideas"
                 display="flex"
                 alignItems="center"
                 gap={2}
+                flexShrink={0}
+                h="34px"
+                px={3}
+                borderRadius="full"
+                color="var(--accent-light)"
+                bg="color-mix(in srgb, var(--accent) 15%, transparent)"
+                fontSize="sm"
+                fontWeight="600"
+                cursor="pointer"
+                transition="background 0.2s"
+                _hover={{ bg: "color-mix(in srgb, var(--accent) 28%, transparent)" }}
               >
-                {(aiSuggestion.length > 0 || aiLoading) && (
-                  <Box
-                    ref={aiContainerRef}
-                    position="absolute"
-                    bottom="100%"
-                    left="0"
-                    right="0"
-                    mb="8px"
-                    bg="gray.700"
-                    borderRadius="10px"
-                    p={2}
-                    zIndex={1000}
-                  >
-                    {aiLoading && (
-                      <Text fontSize="sm" color="gray.400">
-                        AI is thinking...
-                      </Text>
-                    )}
-
-                    {aiSuggestion.map((r, i) => (
-                      <Text
-                        key={i}
-                        cursor="pointer"
-                        bg={i === activeSuggestion ? "gray.600" : "transparent"}
-                        px={2}
-                        py={1}
-                        borderRadius="6px"
-                        _hover={{ color: "#22d3ee" }}
-                        color="white"
-                        fontSize="sm"
-                        mb={1}
-                        onMouseEnter={() => setActiveSuggestion(i)}
-                        onClick={() => {
-                          setNewMessage(r);
-                          setAiSuggestion([]);
-                          setActiveSuggestion(-1);
-                        }}
-                      >
-                        {r}
-                      </Text>
-                    ))}
-                  </Box>
-                )}
-
-                {showEmojiPicker && (
-                  <Box
-                    ref={emojiPickerRef}
-                    position="absolute"
-                    bottom="60px"
-                    left="0"
-                    zIndex={2000}
-                  >
-                    <EmojiPicker
-                      onEmojiClick={(emojiData) => {
-                        setNewMessage((prev) => prev + emojiData.emoji);
-                      }}
-                    />
-                  </Box>
-                )}
-
-                <Input
-                  placeholder="Enter a message...."
-                  variant="filled"
-                  bg="#383333"
-                  value={newMessage}
-                  onChange={typingHandler}
-                  onKeyDown={handleKeyDown}
-                />
-
-                <button
-                  ref={emojiButtonRef}
-                  onClick={() => setShowEmojiPicker((prev) => !prev)}
-                  style={{
-                    padding: "10px",
-                    borderRadius: "8px",
-                    background: "#333",
-                    color: "white",
-                    cursor: "pointer",
-                  }}
-                >
-                  😊
-                </button>
+                <i className="fa-solid fa-wand-magic-sparkles" />
+                <Text as="span" display={{ base: "none", md: "inline" }}>
+                  Ask AI
+                </Text>
               </Box>
-
-              <button
-                onClick={fetchAISuggestions}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: "999px",
-                  background: "rgba(59, 130, 246, 0.08)",
-                  color: "#e5e7eb",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  border: "1px solid rgba(96, 165, 250, 0.15)",
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(16, 185, 129, 0.12)";
-                  e.currentTarget.style.borderColor = "#10b981";
-                  e.currentTarget.style.color = "#d1fae5";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(59, 130, 246, 0.08)";
-                  e.currentTarget.style.borderColor =
-                    "rgba(109, 168, 240, 0.53)";
-                  e.currentTarget.style.color = "#e5e7eb";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                <i className="fa-solid fa-wand-magic-sparkles"></i>
-                Ask AI
-              </button>
             </Box>
+
+            <RoundButton
+              onClick={sendMessage}
+              aria-label="Send message"
+              size="44px"
+              bg="var(--accent)"
+              color="var(--on-accent)"
+              disabled={!newMessage.trim()}
+              opacity={newMessage.trim() ? 1 : 0.5}
+              _hover={{ bg: "var(--accent-strong)" }}
+            >
+              <i className="fa-solid fa-paper-plane" />
+            </RoundButton>
           </Box>
         </>
       ) : (
@@ -714,7 +740,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
       />
     </>
   );
-  
 };
 
 export default SingleChat;
