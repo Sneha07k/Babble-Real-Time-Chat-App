@@ -30,7 +30,14 @@ const createAndSendOtp = async (email, purpose) => {
     { upsert: true },
   );
 
-  await sendOtpEmail(email, code, purpose);
+  try {
+    await sendOtpEmail(email, code, purpose);
+  } catch (error) {
+    // the email never left: drop the code so "try again" isn't blocked by the cooldown
+    await Otp.deleteOne({ email, purpose });
+    console.error(`OTP email to ${email} failed: ${error.message}`);
+    throw otpError(503, "We couldn't send the email right now. Please try again in a moment.");
+  }
 };
 
 // throws if the code is wrong/expired; a correct code can only be used once
